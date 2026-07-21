@@ -1,0 +1,88 @@
+version: "3.9"
+
+# `docker compose up` is the one-command demo path: this file, the seeded
+# catalogue, and the backend's own migrator are what make a judge's laptop go
+# from a fresh clone to a working API with no manual setup step in between.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: myntra
+      POSTGRES_PASSWORD: myntra
+      POSTGRES_DB: myntra_bharat_ai
+    ports:
+      # Mapped to 5433 on the host, not the default 5432 — many dev machines
+      # already have a native Postgres install (Postgres.app, a Homebrew
+      # service, another project's container) sitting on 5432, and this
+      # avoids that collision by default. The container's own internal port
+      # is still 5432, which is what DATABASE_URL below actually talks to —
+      # only the host-side mapping changed.
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myntra -d myntra_bharat_ai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      ENV: development
+      LOG_LEVEL: info
+      ALLOW_GUEST: "true"
+
+      DATABASE_URL: postgres://myntra:myntra@postgres:5432/myntra_bharat_ai?sslmode=disable
+      DB_AUTO_MIGRATE: "true"
+      DB_AUTO_SEED: "true"
+
+      REDIS_URL: redis://redis:6379/0
+      CACHE_TTL_MINUTES: "10"
+
+      # A demo-only default. Anything reviewed or deployed beyond a laptop
+      # must override this — see README, Configuration.
+      JWT_SECRET: "change-this-to-a-random-32-plus-character-secret"
+
+      # Empty by default: the assistant runs on the rule-based extractor alone
+      # and every endpoint works with zero external dependencies. Set this to
+      # enable the Gemini-augmented understanding path.
+      GEMINI_API_KEY: ""
+      GEMINI_MODEL: gemini-2.0-flash
+      GEMINI_ENABLED: "true"
+
+      CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000,http://localhost:4173"
+      CORS_ALLOW_CREDENTIALS: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health/ready"]
+      interval: 15s
+      timeout: 3s
+      start_period: 20s
+      retries: 5
+
+volumes:
+  postgres-data:

@@ -1,0 +1,749 @@
+openapi: 3.0.3
+info:
+  title: Myntra Bharat AI — Backend API
+  description: >
+    Fashion shopping assistant backend for the WeForShe HackerRamp 2026
+    hackathon. The recommendation engine (POST /assistant/chat and
+    GET /products/search) is the product's core differentiator: a five-stage,
+    fully rule-based pipeline (understand → retrieve → score → diversify →
+    explain) that ranks the catalogue against a shopper's natural-language
+    brief with no black-box model in the ranking path. See
+    internal/recommendation in the source tree for the full design notes.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+security:
+  - BearerAuth: []
+  - SessionID: []
+tags:
+  - name: auth
+  - name: products
+  - name: assistant
+  - name: history
+  - name: recommendations
+  - name: favorites
+  - name: dashboard
+  - name: health
+
+paths:
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Register a new account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "201": { $ref: "#/components/responses/AuthResponse" }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Authenticate with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/AuthResponse" }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Exchange a refresh token for a new pair
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RefreshRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/AuthResponse" }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /profile:
+    get:
+      tags: [auth]
+      summary: Get the authenticated account
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/User" } }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /products:
+    get:
+      tags: [products]
+      summary: List and filter products
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Q"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/Brand"
+        - $ref: "#/components/parameters/Gender"
+        - $ref: "#/components/parameters/Occasion"
+        - $ref: "#/components/parameters/Style"
+        - $ref: "#/components/parameters/Color"
+        - $ref: "#/components/parameters/MinPrice"
+        - $ref: "#/components/parameters/MaxPrice"
+        - $ref: "#/components/parameters/MinRating"
+        - $ref: "#/components/parameters/Sort"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200": { $ref: "#/components/responses/ProductPage" }
+
+  /products/search:
+    get:
+      tags: [products]
+      summary: Rank products against a structured query using the recommendation engine
+      description: >
+        Routes through the same engine as POST /assistant/chat via
+        ProductQuery.ToIntent — the search bar and the assistant never
+        disagree about what "best" means for the same constraints.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/Q"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/Brand"
+        - $ref: "#/components/parameters/Gender"
+        - $ref: "#/components/parameters/Occasion"
+        - $ref: "#/components/parameters/Style"
+        - $ref: "#/components/parameters/MinPrice"
+        - $ref: "#/components/parameters/MaxPrice"
+        - $ref: "#/components/parameters/Sort"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200": { $ref: "#/components/responses/ProductPage" }
+
+  /products/{id}:
+    get:
+      tags: [products]
+      summary: Get one product by ID or catalogue slug
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: UUID or slug (e.g. "prod-001")
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/Product" } }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /products/category/{name}:
+    get:
+      tags: [products]
+      summary: List products in one garment category
+      security: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema: { type: string }
+          example: "Kurta Sets"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200": { $ref: "#/components/responses/ProductPage" }
+
+  /products/brand/{name}:
+    get:
+      tags: [products]
+      summary: List products from one brand
+      security: []
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200": { $ref: "#/components/responses/ProductPage" }
+
+  /categories:
+    get:
+      tags: [products]
+      summary: List garment categories with product counts
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: "#/components/schemas/Category" }
+
+  /brands:
+    get:
+      tags: [products]
+      summary: List distinct brands in the catalogue
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: { type: array, items: { type: string } }
+
+  /assistant/chat:
+    post:
+      tags: [assistant]
+      summary: Ask the assistant for a ranked, explained shortlist
+      description: >
+        Runs the deterministic rule extractor and, when configured, Gemini
+        concurrently; merges their reading of the prompt field-by-field
+        (internal/ai/merge.go); ranks the catalogue against the merged intent
+        (internal/recommendation); and persists the run to history and
+        recommendations unless `persist: false` is sent.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/AIRecommendationResponse" } }
+        "422": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /assistant/recommendations/{id}:
+    get:
+      tags: [assistant]
+      summary: Re-fetch a past assistant answer by recommendation ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/AIRecommendationResponse" } }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /history:
+    get:
+      tags: [history]
+      summary: List the shopper's past prompts
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: "#/components/schemas/HistoryEntry" } }
+                      meta: { $ref: "#/components/schemas/PageMeta" }
+    post:
+      tags: [history]
+      summary: Log a history entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateHistoryRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/HistoryEntry" } }
+
+  /history/{id}:
+    patch:
+      tags: [history]
+      summary: Move a history entry between Completed, Saved and Purchased
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateHistoryRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/HistoryEntry" } }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [history]
+      summary: Delete a history entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: No Content }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /recommendations:
+    get:
+      tags: [recommendations]
+      summary: List the shopper's past recommendation runs
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: "#/components/schemas/RecommendationSummary" } }
+                      meta: { $ref: "#/components/schemas/PageMeta" }
+
+  /recommendations/{id}:
+    get:
+      tags: [recommendations]
+      summary: Get one stored recommendation run
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/AIRecommendationResponse" } }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /favorites:
+    get:
+      tags: [favorites]
+      summary: List saved products
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: { type: array, items: { $ref: "#/components/schemas/Favorite" } }
+    post:
+      tags: [favorites]
+      summary: Save a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AddFavoriteRequest" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/Favorite" } }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /favorites/{id}:
+    delete:
+      tags: [favorites]
+      summary: Remove a saved product
+      description: The path parameter is the *product* ID, not the favourite row's ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: No Content }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /dashboard/stats:
+    get:
+      tags: [dashboard]
+      summary: Get the shopper's recommendation dashboard figures
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: { data: { $ref: "#/components/schemas/DashboardStats" } }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    SessionID:
+      type: apiKey
+      in: header
+      name: X-Session-Id
+      description: >
+        Alternative to a bearer token. The frontend ships no login screen, so
+        a stable client-generated ID here mints (or resumes) a guest account
+        with real history and favourites — see internal/middleware/auth.go.
+
+  parameters:
+    Q: { name: q, in: query, schema: { type: string } }
+    Category: { name: category, in: query, schema: { type: string } }
+    Brand: { name: brand, in: query, schema: { type: string } }
+    Gender: { name: gender, in: query, schema: { type: string, enum: [Women, Men, Unisex] } }
+    Occasion:
+      name: occasion
+      in: query
+      schema:
+        type: string
+        enum: [Wedding, Office, College, Party, Travel, Festival, Casual, "Date Night"]
+    Style:
+      name: style
+      in: query
+      schema:
+        type: string
+        enum: [Ethnic, Western, Formal, Streetwear, Minimal, Bohemian, Athleisure, Indo-Western]
+    Color: { name: color, in: query, schema: { type: string } }
+    MinPrice: { name: minPrice, in: query, schema: { type: integer } }
+    MaxPrice: { name: maxPrice, in: query, schema: { type: integer } }
+    MinRating: { name: minRating, in: query, schema: { type: number } }
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+        enum: [relevance, price_asc, price_desc, rating, discount, newest]
+    Page: { name: page, in: query, schema: { type: integer, default: 1 } }
+    PageSize: { name: pageSize, in: query, schema: { type: integer, default: 24 } }
+
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    AuthResponse:
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Envelope"
+              - type: object
+                properties: { data: { $ref: "#/components/schemas/AuthResponse" } }
+    ProductPage:
+      description: OK
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Envelope"
+              - type: object
+                properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/Product" } }
+                  meta: { $ref: "#/components/schemas/PageMeta" }
+
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string }
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            details: {}
+            requestId: { type: string }
+
+    PageMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+        hasNext: { type: boolean }
+        hasPrev: { type: boolean }
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, example: "Asha Menon" }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [User, Admin] }
+        isGuest: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    TokenPair:
+      type: object
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresIn: { type: integer, description: seconds }
+
+    AuthResponse:
+      type: object
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        tokens: { $ref: "#/components/schemas/TokenPair" }
+
+    Product:
+      type: object
+      description: Mirrors the frontend's Product TypeScript interface exactly.
+      properties:
+        id: { type: string }
+        title: { type: string }
+        brand: { type: string }
+        category: { type: string }
+        price: { type: integer, description: whole rupees }
+        mrp: { type: integer }
+        discount: { type: integer, description: whole percent }
+        rating: { type: number }
+        ratingCount: { type: integer }
+        image: { type: string }
+        gender: { type: string, enum: [Women, Men, Unisex] }
+        occasion: { type: string }
+        style: { type: string }
+        color: { type: string }
+        description: { type: string }
+        matchPercent: { type: integer, nullable: true, minimum: 60, maximum: 99 }
+        matchReasons: { type: array, items: { type: string } }
+
+    Category:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        slug: { type: string }
+        description: { type: string }
+        productCount: { type: integer }
+
+    ChatRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt: { type: string, minLength: 2, maxLength: 500, example: "wedding guest outfit under 3000" }
+        persist: { type: boolean, nullable: true, description: "Defaults to true when omitted." }
+
+    IntentView:
+      type: object
+      description: The engine's structured reading of the prompt, for transparency.
+      properties:
+        budgetMin: { type: integer, nullable: true }
+        budgetMax: { type: integer, nullable: true }
+        occasion: { type: string }
+        style: { type: string }
+        gender: { type: string }
+        category: { type: string }
+        colors: { type: array, items: { type: string } }
+        brands: { type: array, items: { type: string } }
+        excludeColors: { type: array, items: { type: string } }
+        excludeBrands: { type: array, items: { type: string } }
+        keywords: { type: array, items: { type: string } }
+        sort: { type: string }
+
+    AssistantMeta:
+      type: object
+      properties:
+        source: { type: string, enum: [rules, gemini, hybrid] }
+        confidence: { type: number }
+        intent: { $ref: "#/components/schemas/IntentView" }
+        candidatePool: { type: integer }
+        relaxed: { type: array, items: { type: string } }
+        latencyMs: { type: integer }
+
+    AIRecommendationResponse:
+      type: object
+      description: Mirrors the frontend's AIRecommendationResponse interface exactly (note the `products` key).
+      properties:
+        summary: { type: string }
+        budget: { type: string, example: "₹3,000" }
+        occasion: { type: string, example: "everyday" }
+        style: { type: string, example: "versatile" }
+        reason: { type: string }
+        products: { type: array, items: { $ref: "#/components/schemas/Product" } }
+        recommendationId: { type: string }
+        meta: { $ref: "#/components/schemas/AssistantMeta" }
+
+    HistoryEntry:
+      type: object
+      properties:
+        id: { type: string }
+        prompt: { type: string }
+        date: { type: string, example: "2026-07-12" }
+        budget: { type: string }
+        occasion: { type: string }
+        productsRecommended: { type: integer }
+        status: { type: string, enum: [Completed, Saved, Purchased] }
+        recommendationId: { type: string }
+        createdAt: { type: string, format: date-time }
+
+    CreateHistoryRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt: { type: string }
+        budget: { type: string }
+        occasion: { type: string }
+        style: { type: string }
+        productsRecommended: { type: integer }
+        status: { type: string, enum: [Completed, Saved, Purchased] }
+
+    UpdateHistoryRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [Completed, Saved, Purchased] }
+
+    RecommendationSummary:
+      type: object
+      properties:
+        id: { type: string }
+        prompt: { type: string }
+        summary: { type: string }
+        reason: { type: string }
+        budget: { type: string }
+        occasion: { type: string }
+        style: { type: string }
+        source: { type: string }
+        createdAt: { type: string, format: date-time }
+        products: { type: array, items: { $ref: "#/components/schemas/Product" } }
+
+    AddFavoriteRequest:
+      type: object
+      required: [productId]
+      properties:
+        productId: { type: string, format: uuid }
+
+    Favorite:
+      type: object
+      properties:
+        id: { type: string }
+        productId: { type: string }
+        product: { $ref: "#/components/schemas/Product" }
+        createdAt: { type: string, format: date-time }
+
+    DashboardStats:
+      type: object
+      properties:
+        recommendationsToday: { type: integer }
+        averageBudget: { type: integer }
+        mostSelectedCategory: { type: string }
+        averageAIMatch: { type: integer }
+        totalProducts: { type: integer }
+        totalRecommendations: { type: integer }
+        categoryBreakdown:
+          type: array
+          items:
+            type: object
+            properties: { name: { type: string }, value: { type: integer } }

@@ -1,0 +1,11 @@
+.git
+.gitignore
+*.md
+!README.md
+.env
+.env.local
+postman/
+frontend-integration/
+scripts/
+tmp/
+*.log
