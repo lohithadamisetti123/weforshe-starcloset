@@ -3,16 +3,87 @@ import type { MouseEvent } from 'react'
 import { motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { Variants } from 'framer-motion'
 import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react'
-
+import img1 from '@/assets/images/occasions/img1.png'
+import img2 from '@/assets/images/occasions/img2.png'
+import img3 from '@/assets/images/occasions/img3.png'
+import img4 from '@/assets/images/occasions/img4.png'
+import img5 from '@/assets/images/occasions/img5.png'
+import img6 from '@/assets/images/occasions/img6.png'
+import img7 from '@/assets/images/occasions/img7.png'
+import img8 from '@/assets/images/occasions/img8.png'
 const OCCASIONS = [
-  { id: 'wedding', num: '01', title: 'Wedding', description: 'Elegant ethnic looks curated for your special day.', prompt: 'I need a wedding outfit under ₹3000', insight: 'Trending wedding styles in your budget', img: 'src/assets/images/occasions/img1.png' },
-  { id: 'office', num: '02', title: 'Office', description: 'Professional styles constructed with effortless confidence.', prompt: 'Suggest a professional office outfit', insight: 'AI matched for a professional look', img: 'src/assets/images/occasions/img2.png' },
-  { id: 'college', num: '03', title: 'College', description: 'Comfortable everyday fashion dialed into your aesthetic.', prompt: 'Recommend a casual college outfit', insight: 'Popular among students this week', img: 'src/assets/images/occasions/img3.png' },
-  { id: 'party', num: '04', title: 'Party', description: 'Stand out from the room with bold premium evening looks.', prompt: 'Need a party outfit under ₹4000', insight: 'Curated for your evening style', img: 'src/assets/images/occasions/img4.png' },
-  { id: 'travel', num: '05', title: 'Travel', description: 'Comfort meets first-class styling on every single journey.', prompt: 'Suggest comfortable travel outfits', insight: 'Comfortable outfits for long journeys', img: 'src/assets/images/occasions/img5.png' },
-  { id: 'festival', num: '06', title: 'Festival', description: 'Celebrate cultural heritage traditions with modern elegance.', prompt: 'Recommend a festive ethnic look', insight: 'Traditional styles selected by AI', img: 'src/assets/images/occasions/img6.png' },
-  { id: 'datenight', num: '07', title: 'Date Night', description: 'Timeless luxury silhouettes crafted for unforgettable evenings.', prompt: 'Suggest a stylish date night outfit', insight: 'Elegant combinations picked for you', img: 'src/assets/images/occasions/img7.png' },
-  { id: 'gym', num: '08', title: 'Gym & Active', description: 'High-performance textiles engineered for everyday lifestyle comfort.', prompt: 'Show premium activewear', insight: 'Activewear optimized for comfort', img: 'src/assets/images/occasions/img8.png' },
+  {
+    id: 'wedding',
+    num: '01',
+    title: 'Wedding',
+    description: 'Elegant ethnic looks curated for your special day.',
+    prompt: 'I need a wedding outfit under ₹3000',
+    insight: 'Trending wedding styles in your budget',
+    img: img1,
+  },
+  {
+    id: 'office',
+    num: '02',
+    title: 'Office',
+    description: 'Professional styles constructed with effortless confidence.',
+    prompt: 'Suggest a professional office outfit',
+    insight: 'AI matched for a professional look',
+    img: img2,
+  },
+  {
+    id: 'college',
+    num: '03',
+    title: 'College',
+    description: 'Comfortable everyday fashion dialed into your aesthetic.',
+    prompt: 'Recommend a casual college outfit',
+    insight: 'Popular among students this week',
+    img: img3,
+  },
+  {
+    id: 'party',
+    num: '04',
+    title: 'Party',
+    description: 'Stand out from the room with bold premium evening looks.',
+    prompt: 'Need a party outfit under ₹4000',
+    insight: 'Curated for your evening style',
+    img: img4,
+  },
+  {
+    id: 'travel',
+    num: '05',
+    title: 'Travel',
+    description: 'Comfort meets first-class styling on every single journey.',
+    prompt: 'Suggest comfortable travel outfits',
+    insight: 'Comfortable outfits for long journeys',
+    img: img5,
+  },
+  {
+    id: 'festival',
+    num: '06',
+    title: 'Festival',
+    description: 'Celebrate cultural heritage traditions with modern elegance.',
+    prompt: 'Recommend a festive ethnic look',
+    insight: 'Traditional styles selected by AI',
+    img: img6,
+  },
+  {
+    id: 'datenight',
+    num: '07',
+    title: 'Date Night',
+    description: 'Timeless luxury silhouettes crafted for unforgettable evenings.',
+    prompt: 'Suggest a stylish date night outfit',
+    insight: 'Elegant combinations picked for you',
+    img: img7,
+  },
+  {
+    id: 'gym',
+    num: '08',
+    title: 'Gym & Active',
+    description: 'High-performance textiles engineered for everyday lifestyle comfort.',
+    prompt: 'Show premium activewear',
+    insight: 'Activewear optimized for comfort',
+    img: img8,
+  },
 ]
 
 export function Occasions() {

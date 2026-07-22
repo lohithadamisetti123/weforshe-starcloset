@@ -2,16 +2,68 @@ import { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import type { Variants } from 'framer-motion'
 import { Sparkles, ArrowUpRight, Bot, Wand2 } from 'lucide-react'
-
+import img1 from '@/assets/images/categories/img1.png'
+import img2 from '@/assets/images/categories/img2.png'
+import img3 from '@/assets/images/categories/img3.png'
+import img4 from '@/assets/images/categories/img4.png'
+import img6 from '@/assets/images/categories/img6.png'
+import img7 from '@/assets/images/categories/img7.png'
+import img8 from '@/assets/images/categories/img8.png'
 const CATEGORIES = [
-  { id: 'women', title: "Women's Fashion", tagline: "Elegant styles curated for every moment.", img: "src/assets/images/categories/img1.png", side: 'left' },
-  { id: 'men', title: "Men's Fashion", tagline: "Premium smart casual tailored to perfection.", img: "src/assets/images/categories/img2.png", side: 'left' },
-  { id: 'kids', title: "Kids' Collection", tagline: "Happy premium design for little trendsetters.", img: "src/assets/images/categories/img3.png", side: 'right' },
-  { id: 'beauty', title: "Beauty & Cosmetics", tagline: "Luxury skincare and modern beauty formulas.", img: "src/assets/images/categories/img4.png", side: 'right' },
-  { id: 'footwear', title: "Premium Footwear", tagline: "Statement luxury sneakers and crafted shoes.", img: "src/assets/images/categories/img6.png", side: 'left' },
-  { id: 'watches', title: "Luxury Watches", tagline: "Timeless horology craftsmanship close-up.", img: "src/assets/images/categories/img7.png", side: 'right' },
-  { id: 'accessories', title: "Elite Accessories", tagline: "High-end statement designer handbags & sunglasses.", img: "src/assets/images/categories/img8.png", side: 'right' },
-  { id: 'ai-stylist', isAIPortal: true, side: 'right' },
+  {
+    id: 'women',
+    title: "Women's Fashion",
+    tagline: 'Elegant styles curated for every moment.',
+    img: img1,
+    side: 'left',
+  },
+  {
+    id: 'men',
+    title: "Men's Fashion",
+    tagline: 'Premium smart casual tailored to perfection.',
+    img: img2,
+    side: 'left',
+  },
+  {
+    id: 'kids',
+    title: "Kids' Collection",
+    tagline: 'Happy premium design for little trendsetters.',
+    img: img3,
+    side: 'right',
+  },
+  {
+    id: 'beauty',
+    title: 'Beauty & Cosmetics',
+    tagline: 'Luxury skincare and modern beauty formulas.',
+    img: img4,
+    side: 'right',
+  },
+  {
+    id: 'footwear',
+    title: 'Premium Footwear',
+    tagline: 'Statement luxury sneakers and crafted shoes.',
+    img: img6,
+    side: 'left',
+  },
+  {
+    id: 'watches',
+    title: 'Luxury Watches',
+    tagline: 'Timeless horology craftsmanship close-up.',
+    img: img7,
+    side: 'right',
+  },
+  {
+    id: 'accessories',
+    title: 'Elite Accessories',
+    tagline: 'High-end statement designer handbags & sunglasses.',
+    img: img8,
+    side: 'right',
+  },
+  {
+    id: 'ai-stylist',
+    isAIPortal: true,
+    side: 'right',
+  },
 ]
 
 export function Categories() {
