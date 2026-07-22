@@ -62,7 +62,8 @@ func (r *userProfileRepository) Upsert(ctx context.Context, profile *models.User
 		DoUpdates: clause.AssignmentColumns([]string{
 			"name", "gender", "city", "budget_min", "budget_max",
 			"favorite_styles", "favorite_colors", "favorite_brands",
-			"favorite_categories", "onboarded", "updated_at",
+			"favorite_categories", "favorite_occasions", "sizes",
+			"onboarded", "updated_at",
 		}),
 	}).Create(profile).Error
 	if err != nil {

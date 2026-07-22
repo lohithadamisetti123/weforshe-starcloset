@@ -23,6 +23,8 @@ type UpdateProfileRequest struct {
 	FavoriteColors     []string `json:"favoriteColors" validate:"omitempty,max=20,dive,max=48"`
 	FavoriteBrands     []string `json:"favoriteBrands" validate:"omitempty,max=20,dive,max=80"`
 	FavoriteCategories []string `json:"favoriteCategories" validate:"omitempty,max=20,dive,max=48"`
+	FavoriteOccasions  []string `json:"favoriteOccasions" validate:"omitempty,max=20,dive,max=48"`
+	Sizes              []string `json:"sizes" validate:"omitempty,max=20,dive,max=24"`
 
 	// Onboarded lets the client mark onboarding complete on first submit. It is
 	// a pointer so an ordinary edit (which omits it) never accidentally flips a
@@ -41,6 +43,8 @@ type ProfileResponse struct {
 	FavoriteColors     []string `json:"favoriteColors"`
 	FavoriteBrands     []string `json:"favoriteBrands"`
 	FavoriteCategories []string `json:"favoriteCategories"`
+	FavoriteOccasions  []string `json:"favoriteOccasions"`
+	Sizes              []string `json:"sizes"`
 	Onboarded          bool     `json:"onboarded"`
 }
 
@@ -53,6 +57,8 @@ func NewProfileResponse(p *models.UserProfile) ProfileResponse {
 			FavoriteColors:     []string{},
 			FavoriteBrands:     []string{},
 			FavoriteCategories: []string{},
+			FavoriteOccasions:  []string{},
+			Sizes:              []string{},
 			Onboarded:          false,
 		}
 	}
@@ -66,6 +72,8 @@ func NewProfileResponse(p *models.UserProfile) ProfileResponse {
 		FavoriteColors:     orEmpty(p.ColorsList()),
 		FavoriteBrands:     orEmpty(p.BrandsList()),
 		FavoriteCategories: orEmpty(p.CategoriesList()),
+		FavoriteOccasions:  orEmpty(p.OccasionsList()),
+		Sizes:              orEmpty(p.SizesList()),
 		Onboarded:          p.Onboarded,
 	}
 }

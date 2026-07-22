@@ -1,41 +1,40 @@
 import { useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import type { Variants } from 'framer-motion'
+import { Sparkles, ArrowUpRight, Bot, Wand2 } from 'lucide-react'
 
 const CATEGORIES = [
   { id: 'women', title: "Women's Fashion", tagline: "Elegant styles curated for every moment.", img: "src/assets/images/categories/img1.png", side: 'left' },
   { id: 'men', title: "Men's Fashion", tagline: "Premium smart casual tailored to perfection.", img: "src/assets/images/categories/img2.png", side: 'left' },
   { id: 'kids', title: "Kids' Collection", tagline: "Happy premium design for little trendsetters.", img: "src/assets/images/categories/img3.png", side: 'right' },
   { id: 'beauty', title: "Beauty & Cosmetics", tagline: "Luxury skincare and modern beauty formulas.", img: "src/assets/images/categories/img4.png", side: 'right' },
-  { id: 'home', title: "Luxury Home", tagline: "Modern luxury interiors and curated spaces.", img: "src/assets/images/categories/img5.png", side: 'left' },
   { id: 'footwear', title: "Premium Footwear", tagline: "Statement luxury sneakers and crafted shoes.", img: "src/assets/images/categories/img6.png", side: 'left' },
   { id: 'watches', title: "Luxury Watches", tagline: "Timeless horology craftsmanship close-up.", img: "src/assets/images/categories/img7.png", side: 'right' },
   { id: 'accessories', title: "Elite Accessories", tagline: "High-end statement designer handbags & sunglasses.", img: "src/assets/images/categories/img8.png", side: 'right' },
+  { id: 'ai-stylist', isAIPortal: true, side: 'right' },
 ]
 
 export function Categories() {
   const containerRef = useRef(null)
-  // Triggers smoothly when the container top breaks the window horizon
   const isInView = useInView(containerRef, { once: true, amount: 0.05 })
 
   return (
-    /* Fix: pt-0 completely removes the dead space below the hero component */
-    <section className="relative w-full bg-white pb-24 lg:pb-36 pt-0 overflow-hidden flex flex-col items-center">
+    <section className="relative w-full bg-white pb-0 pt-0 overflow-hidden flex flex-col items-center">
       
       {/* --- LUXURY ATMOSPHERE BACKGROUND DECORATIONS --- */}
-      <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-gradient-to-tr from-rose-400/10 via-pink-300/5 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
-      <div className="absolute bottom-1/4 right-[-10%] w-[600px] h-[600px] bg-gradient-to-bl from-amber-400/5 via-rose-300/10 to-transparent blur-[160px] pointer-events-none rounded-full -z-10" />
+      <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-gradient-to-tr from-amber-200/20 via-rose-200/10 to-transparent blur-[140px] pointer-events-none rounded-full -z-10" />
+      <div className="absolute bottom-0 right-[-10%] w-[600px] h-[600px] bg-gradient-to-bl from-amber-300/15 via-rose-200/10 to-transparent blur-[160px] pointer-events-none rounded-full -z-10" />
       
-      <div className="absolute inset-0 pointer-events-none opacity-30 select-none bg-[radial-gradient(#f43f5e_1px,transparent_1px)] [background-size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)] -z-10" />
+      <div className="absolute inset-0 pointer-events-none opacity-20 select-none bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:40px_40px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)] -z-10" />
 
       {/* --- SECTION HEADER --- */}
-      <div className="relative w-full max-w-[1440px] px-6 lg:px-12 mt-12 mb-16 lg:mb-24 text-center z-10 flex flex-col items-center">
+      <div className="relative w-full max-w-[1440px] px-6 lg:px-12 mt-12 mb-12 lg:mb-16 text-center z-10 flex flex-col items-center">
         <motion.span 
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-xs font-black tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-amber-500 uppercase mb-4"
+          className="text-xs font-black tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-rose-500 to-amber-700 uppercase mb-3"
         >
           Curated Exclusives
         </motion.span>
@@ -55,7 +54,7 @@ export function Categories() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mt-6 max-w-xl text-base sm:text-lg text-slate-500 font-normal leading-relaxed tracking-wide"
+          className="mt-4 max-w-xl text-base sm:text-lg text-slate-500 font-normal leading-relaxed tracking-wide"
         >
           Explore fashion across every category with beautifully curated collections powered by AI.
         </motion.p>
@@ -66,24 +65,32 @@ export function Categories() {
         ref={containerRef}
         className="relative w-full max-w-[1440px] px-0 sm:px-6 lg:px-12 z-10"
       >
-        {/* Mobile View: Clean Native Snap Track */}
-        <div className="flex sm:hidden overflow-x-auto gap-5 px-6 pb-8 scrollbar-none snap-x snap-mandatory touch-pan-x">
+        {/* Mobile View */}
+        <div className="flex sm:hidden overflow-x-auto gap-5 px-6 pb-0 scrollbar-none snap-x snap-mandatory touch-pan-x">
           {CATEGORIES.map((category, index) => (
             <div key={category.id} className="w-[82vw] flex-shrink-0 snap-center">
-              <CategoryCard category={category} index={index} isInView={true} />
+              {category.isAIPortal ? (
+                <AIPortalTrigger index={index} isInView={true} />
+              ) : (
+                <CategoryCard category={category} index={index} isInView={true} />
+              )}
             </div>
           ))}
         </div>
 
-        {/* Tablet & Desktop View: Convergent Card Reveal Matrix */}
+        {/* Desktop Grid View */}
         <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-8 overflow-visible">
           {CATEGORIES.map((category, index) => (
-            <CategoryCard 
-              key={category.id} 
-              category={category} 
-              index={index} 
-              isInView={isInView} 
-            />
+            category.isAIPortal ? (
+              <AIPortalTrigger key={category.id} index={index} isInView={isInView} />
+            ) : (
+              <CategoryCard 
+                key={category.id} 
+                category={category} 
+                index={index} 
+                isInView={isInView} 
+              />
+            )
           ))}
         </div>
       </div>
@@ -91,15 +98,121 @@ export function Categories() {
   )
 }
 
+/* --- ELEGANT BISCUIT & GOLD AI PORTAL TRIGGER --- */
+function AIPortalTrigger({ index, isInView }: { index: number, isInView: boolean }) {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const handleClick = () => {
+    window.location.href = '/assistant'
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+      animate={isInView ? { opacity: 1, scale: 1, filter: 'blur(0px)' } : {}}
+      transition={{ duration: 0.8, delay: (index % 4) * 0.08, type: 'spring' }}
+      onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      whileHover={{ scale: 1.03, y: -4 }}
+      className="relative aspect-[3/4] sm:aspect-[4/5] lg:aspect-[3/4.2] w-full h-full rounded-[28px] flex flex-col items-center justify-center cursor-pointer group select-none overflow-hidden bg-[#FBF8F3] border border-amber-200/60 shadow-sm transition-all duration-300"
+      tabIndex={0}
+      role="button"
+      aria-label="Launch AI Stylist Assistant"
+    >
+      {/* 1. SOFT BISCUIT / GOLD ORBITAL LIGHT FIELD */}
+      <motion.div 
+        animate={{ 
+          scale: isHovered ? [1.05, 1.25, 1.05] : [1, 1.1, 1],
+          rotate: [0, 180, 360],
+          opacity: isHovered ? 0.85 : 0.55
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+        className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-amber-200/80 via-rose-200/50 to-amber-300/70 blur-[50px] pointer-events-none"
+      />
+
+      {/* 2. REVOLVING FINE METALLIC RINGS */}
+      <motion.div 
+        animate={{ rotate: [0, 360] }}
+        transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
+        className="absolute w-60 h-60 rounded-full border border-dashed border-amber-400/30 pointer-events-none"
+      />
+      
+      <motion.div 
+        animate={{ rotate: [360, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
+        className="absolute w-48 h-48 rounded-full border border-amber-300/40 border-t-rose-400/50 pointer-events-none"
+      />
+
+      {/* 3. CENTER TRIGGER NODE */}
+      <div className="relative z-20 flex flex-col items-center gap-6">
+        <motion.div
+          animate={{ 
+            scale: isHovered ? 1.12 : 1,
+            y: isHovered ? -4 : 0
+          }}
+          transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+          className="relative w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-stone-900/90 border border-amber-300/50 backdrop-blur-md shadow-[0_12px_30px_-6px_rgba(217,119,6,0.25)] flex items-center justify-center text-white overflow-hidden group-hover:border-amber-200 transition-colors"
+        >
+          {/* Subtle Inner Sweep */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-amber-400/20 via-transparent to-rose-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          {/* Animated Main Arrow */}
+          <motion.div
+            animate={{ 
+              x: isHovered ? [0, 3, 0] : 0, 
+              y: isHovered ? [0, -3, 0] : 0 
+            }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="relative z-10 flex items-center justify-center"
+          >
+            <ArrowUpRight size={32} className="text-amber-200 group-hover:text-white transition-colors" />
+          </motion.div>
+
+          {/* Floating Sparkles */}
+          <motion.div 
+            animate={{ rotate: [0, 360] }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 p-2 flex items-center justify-between pointer-events-none"
+          >
+            <Sparkles size={11} className="text-amber-300 opacity-90" />
+            <Wand2 size={11} className="text-rose-300 opacity-90" />
+          </motion.div>
+        </motion.div>
+
+        {/* 4. TYPOGRAPHY & INTENT */}
+        <div className="text-center space-y-1.5 px-4 z-20">
+          <motion.div 
+            animate={{ y: isHovered ? -2 : 0 }}
+            className="inline-flex items-center gap-1.5 text-[11px] font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-rose-600 to-amber-800 uppercase"
+          >
+            <Bot size={13} className="text-amber-700" /> Bharat AI Stylist
+          </motion.div>
+          <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 group-hover:text-amber-800 transition-colors font-sans">
+            Ask AI Assistant
+          </h3>
+          <p className="text-xs text-stone-500 max-w-[190px] font-medium leading-relaxed mx-auto">
+            Interactive lookbook generator tuned to your style
+          </p>
+        </div>
+      </div>
+
+      {/* 5. LIGHT SHIMMER SWEEP OVERLAY */}
+      <div className="absolute inset-0 w-[200%] h-full top-0 left-[-100%] bg-gradient-to-r from-transparent via-amber-100/30 to-transparent -skew-x-12 translate-x-0 group-hover:translate-x-[200%] transition-transform duration-[1200ms] ease-out pointer-events-none z-20" />
+
+      {/* 6. HOVER SHADOW EXPANSION */}
+      <div className="absolute inset-0 rounded-[28px] ring-1 ring-amber-300/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 shadow-[0_20px_45px_-12px_rgba(217,119,6,0.2)]" />
+    </motion.div>
+  )
+}
+
 /* --- CONVERGENT EDITORIAL CARD --- */
 function CategoryCard({ category, index, isInView }: { category: any, index: number, isInView: boolean }) {
   const [isHovered, setIsHovered] = useState(false)
 
-  // Determine horizontal entry point based on its designated side
   const xOffset = category.side === 'left' ? -120 : 120
 
-  // High-level cinematic entry variant (Slide inward, lose blur, lock layout)
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { 
       opacity: 0, 
       x: xOffset,
@@ -117,7 +230,7 @@ function CategoryCard({ category, index, isInView }: { category: any, index: num
         type: 'spring', 
         stiffness: 45, 
         damping: 14, 
-        delay: (index % 4) * 0.08 // Staggers cleanly by columns across the grid
+        delay: (index % 4) * 0.08
       }
     }
   }
@@ -126,6 +239,7 @@ function CategoryCard({ category, index, isInView }: { category: any, index: num
     <motion.div
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
+      variants={cardVariants}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       whileHover={{ scale: 1.03, y: -4 }}

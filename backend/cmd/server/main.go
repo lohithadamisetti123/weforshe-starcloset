@@ -117,6 +117,9 @@ func run() error {
 	historyRepo := repositories.NewHistoryRepository(db, log)
 	recommendationRepo := repositories.NewRecommendationRepository(db, log)
 	favoriteRepo := repositories.NewFavoriteRepository(db, log)
+	cartRepo := repositories.NewCartRepository(db, log)
+	savedCollectionRepo := repositories.NewSavedCollectionRepository(db, log)
+	collectionCartRepo := repositories.NewCollectionCartRepository(db, log)
 	userProfileRepo := repositories.NewUserProfileRepository(db, log)
 	pastOrderRepo := repositories.NewPastOrderRepository(db, log)
 
@@ -178,6 +181,7 @@ func run() error {
 	historyService := services.NewHistoryService(historyRepo, cache, log)
 	recommendationService := services.NewRecommendationService(recommendationRepo, log)
 	favoriteService := services.NewFavoriteService(favoriteRepo, log)
+	cartService := services.NewCartService(cartRepo, savedCollectionRepo, collectionCartRepo, log)
 	dashboardService := services.NewDashboardService(historyRepo, recommendationRepo, productRepo, cache, log)
 
 	val := validator.New()
@@ -192,6 +196,7 @@ func run() error {
 		Favorite:       handlers.NewFavoriteHandler(favoriteService, val),
 		Dashboard:      handlers.NewDashboardHandler(dashboardService),
 		Profile:        handlers.NewProfileHandler(profileService, val),
+		Cart:           handlers.NewCartHandler(cartService, val),
 	}
 
 	router := buildRouter(cfg, log)

@@ -28,6 +28,7 @@ type Handlers struct {
 	Favorite       *handlers.FavoriteHandler
 	Dashboard      *handlers.DashboardHandler
 	Profile        *handlers.ProfileHandler
+	Cart           *handlers.CartHandler
 }
 
 // Register mounts every route.
@@ -116,6 +117,34 @@ func Register(
 			favorites.GET("", h.Favorite.List)
 			favorites.POST("", h.Favorite.Add)
 			favorites.DELETE("/:id", h.Favorite.Remove)
+		}
+
+		// Per-user cart and collection stores. These live under the authed
+		// group so every request carries an identity; the handlers scope every
+		// read and write to it, which is what keeps one shopper's cart and
+		// wishlist invisible to another.
+		cart := authed.Group("/cart")
+		{
+			cart.GET("", h.Cart.List)
+			cart.POST("", h.Cart.Add)
+			cart.DELETE("", h.Cart.Clear)
+			cart.DELETE("/:productId", h.Cart.Remove)
+		}
+
+		savedCollections := authed.Group("/saved-collections")
+		{
+			savedCollections.GET("", h.Cart.ListSaved)
+			savedCollections.POST("", h.Cart.Save)
+			savedCollections.DELETE("/:id", h.Cart.DeleteSaved)
+		}
+
+		collectionCart := authed.Group("/collection-cart")
+		{
+			collectionCart.GET("", h.Cart.ListCollectionCart)
+			collectionCart.POST("", h.Cart.AddCollection)
+			collectionCart.DELETE("", h.Cart.ClearCollectionCart)
+			collectionCart.PUT("/:id", h.Cart.UpdateCollection)
+			collectionCart.DELETE("/:id", h.Cart.DeleteCollection)
 		}
 
 		// Personalization profile. Grouped under /profile so it sits alongside

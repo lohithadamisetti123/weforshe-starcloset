@@ -41,6 +41,12 @@ type UserProfile struct {
 	FavoriteColors     JSONB `gorm:"type:jsonb;not null;default:'[]'" json:"favoriteColors"`
 	FavoriteBrands     JSONB `gorm:"type:jsonb;not null;default:'[]'" json:"favoriteBrands"`
 	FavoriteCategories JSONB `gorm:"type:jsonb;not null;default:'[]'" json:"favoriteCategories"`
+	// FavoriteOccasions seeds the personalized feed and reinforces the engine's
+	// occasion signal; Sizes are stored for display and future filtering (the
+	// current catalogue carries no size dimension, so sizes do not yet affect
+	// ranking).
+	FavoriteOccasions JSONB `gorm:"type:jsonb;not null;default:'[]'" json:"favoriteOccasions"`
+	Sizes             JSONB `gorm:"type:jsonb;not null;default:'[]'" json:"sizes"`
 
 	// Onboarded marks that the shopper completed the onboarding flow at least
 	// once, so the client shows it exactly once and offers edit thereafter.
@@ -63,6 +69,8 @@ func (p *UserProfile) BeforeSave(_ *gorm.DB) error {
 	p.FavoriteColors = ensureJSONArray(p.FavoriteColors)
 	p.FavoriteBrands = ensureJSONArray(p.FavoriteBrands)
 	p.FavoriteCategories = ensureJSONArray(p.FavoriteCategories)
+	p.FavoriteOccasions = ensureJSONArray(p.FavoriteOccasions)
+	p.Sizes = ensureJSONArray(p.Sizes)
 	return nil
 }
 
@@ -74,6 +82,8 @@ func (p *UserProfile) StylesList() []string     { return decodeStringList(p.Favo
 func (p *UserProfile) ColorsList() []string     { return decodeStringList(p.FavoriteColors) }
 func (p *UserProfile) BrandsList() []string     { return decodeStringList(p.FavoriteBrands) }
 func (p *UserProfile) CategoriesList() []string { return decodeStringList(p.FavoriteCategories) }
+func (p *UserProfile) OccasionsList() []string  { return decodeStringList(p.FavoriteOccasions) }
+func (p *UserProfile) SizesList() []string      { return decodeStringList(p.Sizes) }
 
 // ensureJSONArray returns a valid `[]` JSONB when the value is empty/invalid.
 func ensureJSONArray(j JSONB) JSONB {

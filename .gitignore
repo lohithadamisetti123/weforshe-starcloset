@@ -1,0 +1,75 @@
+# =========================
+# Global
+# =========================
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# =========================
+# Frontend
+# =========================
+
+# Dependencies
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/.vite/
+
+# TypeScript
+frontend/*.tsbuildinfo
+
+# Environment
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Coverage
+frontend/coverage/
+
+# Local data
+frontend/data/
+
+# =========================
+# Backend
+# =========================
+
+# Build binaries
+backend/server
+backend/seed
+backend/migrate
+
+# Go
+backend/*.exe
+backend/*.exe~
+backend/*.dll
+backend/*.so
+backend/*.dylib
+backend/*.test
+
+# Go workspace (developer local)
+backend/go.work
+backend/go.work.sum
+
+# Coverage & profiling
+backend/*.out
+backend/*.prof
+backend/coverage.html
+
+# Environment
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Vendor
+# Remove this line if you intentionally vendor dependencies:
+# go mod vendor
+backend/vendor/

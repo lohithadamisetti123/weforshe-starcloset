@@ -1,15 +1,61 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, Sparkles, X, ShoppingBag, Heart } from 'lucide-react'
+import { Menu, Sparkles, X, ShoppingBag, Heart, LogOut, User } from 'lucide-react'
 import { useShop } from '@/context/ShopContext'
+import { useAuth } from '@/context/AuthContext'
 import { navLinks } from '@/constants/nav'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 
+// NavbarAuth renders the sign-in entry point, or the signed-in shopper's name
+// with a logout control. It reuses the shared Button and the app's tokens, so
+// it sits in the existing navbar without altering its look.
+function NavbarAuth() {
+  const { isAuthenticated, user, logout } = useAuth()
+
+  if (!isAuthenticated) {
+    return (
+      <Link to="/signin">
+        <Button variant="outline" size="md">
+          <User className="h-4 w-4" />
+          Sign in
+        </Button>
+      </Link>
+    )
+  }
+
+  const firstName = user?.name?.split(' ')[0] ?? 'You'
+  return (
+    <div className="flex items-center gap-2">
+      <Link
+        to="/profile"
+        className="flex items-center gap-1.5 rounded-full border border-line bg-white px-3 py-1.5 text-xs font-semibold text-ink-700 hover:border-brand-500"
+      >
+        <User className="h-3.5 w-3.5 text-brand-500" />
+        {firstName}
+      </Link>
+      <button
+        onClick={logout}
+        aria-label="Log out"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-500 transition-colors hover:border-brand-500 hover:text-brand-600"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
+    </div>
+  )
+}
+
 function NavbarBadges() {
   const { savedCount, collectionCartCount, cartCount } = useShop()
+  const { isAuthenticated } = useAuth()
   const totalCartItems = cartCount + collectionCartCount
+
+  // Saved and Cart both require an account now, so their shortcuts are hidden
+  // while signed out — showing a count for pages the visitor can't open would
+  // be misleading, and the counts belong to the account anyway.
+  if (!isAuthenticated) return null
+
   return (
     <div className="flex items-center gap-2">
       {savedCount > 0 && (
@@ -28,9 +74,56 @@ function NavbarBadges() {
   )
 }
 
+// MobileAuth mirrors NavbarAuth for the mobile menu (full-width controls).
+function MobileAuth({ onNavigate }: { onNavigate: () => void }) {
+  const { isAuthenticated, user, logout } = useAuth()
+
+  if (!isAuthenticated) {
+    return (
+      <Link to="/signin" onClick={onNavigate} className="mt-2">
+        <Button variant="outline" className="w-full">
+          <User className="h-4 w-4" />
+          Sign in
+        </Button>
+      </Link>
+    )
+  }
+
+  const firstName = user?.name?.split(' ')[0] ?? 'You'
+  return (
+    <div className="mt-2 flex flex-col gap-2">
+      <Link
+        to="/profile"
+        onClick={onNavigate}
+        className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-ink-700"
+      >
+        <User className="h-4 w-4 text-brand-500" />
+        {firstName}
+      </Link>
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={() => {
+          onNavigate()
+          logout()
+        }}
+      >
+        <LogOut className="h-4 w-4" />
+        Log out
+      </Button>
+    </div>
+  )
+}
+
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const { isAuthenticated } = useAuth()
+
+  // Home is the only page reachable without an account, so while signed out the
+  // remaining links are hidden rather than shown as dead ends that bounce
+  // straight to the sign-in screen. Signed in, the full nav returns unchanged.
+  const visibleLinks = isAuthenticated ? navLinks : navLinks.filter((link) => link.to === '/')
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -57,7 +150,7 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-1 rounded-full border border-line bg-white/70 px-1.5 py-1.5 lg:flex">
-          {navLinks.map((link) => (
+          {visibleLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -76,6 +169,7 @@ export function Navbar() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <NavbarBadges />
+          <NavbarAuth />
           <Link to="/assistant">
             <Button size="md">
               <Sparkles className="h-4 w-4" />
@@ -103,7 +197,7 @@ export function Navbar() {
             className="overflow-hidden border-t border-line bg-white lg:hidden"
           >
             <div className="flex flex-col gap-1 px-5 py-4">
-              {navLinks.map((link) => (
+              {visibleLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
@@ -125,6 +219,7 @@ export function Navbar() {
                   Try AI
                 </Button>
               </Link>
+              <MobileAuth onNavigate={() => setOpen(false)} />
             </div>
           </motion.div>
         )}

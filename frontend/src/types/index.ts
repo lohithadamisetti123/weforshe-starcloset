@@ -192,6 +192,8 @@ export interface UserProfile {
   favoriteColors: string[]
   favoriteBrands: string[]
   favoriteCategories: string[]
+  favoriteOccasions: string[]
+  sizes: string[]
   onboarded: boolean
 }
 
@@ -208,6 +210,8 @@ export interface UpdateProfileRequest {
   favoriteColors?: string[]
   favoriteBrands?: string[]
   favoriteCategories?: string[]
+  favoriteOccasions?: string[]
+  sizes?: string[]
   onboarded?: boolean
 }
 
@@ -219,6 +223,31 @@ export interface PastOrder {
   image: string
   price: number
   orderedAt: string
+}
+
+// ── Authentication ───────────────────────────────────────────────────────────
+// These mirror the backend dto.AuthResponse / utils.TokenPair returned by
+// POST /auth/register, /auth/login and /auth/refresh.
+
+export interface AuthUser {
+  id: string
+  name: string
+  email: string
+  role: string
+  isGuest: boolean
+  createdAt: string
+}
+
+export interface AuthTokens {
+  accessToken: string
+  refreshToken: string
+  tokenType: string
+  expiresIn: number
+}
+
+export interface AuthResponse {
+  user: AuthUser
+  tokens: AuthTokens
 }
 
 // ── AI Chat History ──────────────────────────────────────────────────────────

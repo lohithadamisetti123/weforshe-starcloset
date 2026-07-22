@@ -33,6 +33,8 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     favorite_colors      JSONB       NOT NULL DEFAULT '[]'::jsonb,
     favorite_brands      JSONB       NOT NULL DEFAULT '[]'::jsonb,
     favorite_categories  JSONB       NOT NULL DEFAULT '[]'::jsonb,
+    favorite_occasions   JSONB       NOT NULL DEFAULT '[]'::jsonb,
+    sizes                JSONB       NOT NULL DEFAULT '[]'::jsonb,
     onboarded            BOOLEAN     NOT NULL DEFAULT FALSE,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at           TIMESTAMPTZ NOT NULL DEFAULT NOW(),

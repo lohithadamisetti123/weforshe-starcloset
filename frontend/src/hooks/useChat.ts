@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useShop } from '@/context/AppContext'
+import { useSession } from '@/context/SessionContext'
+import { capExclusions } from '@/context/sessionState'
 import { apiFetch } from '@/lib/api'
 import type {
   AIRecommendationResponse,
@@ -58,9 +60,10 @@ export const departmentPrompts: Record<string, string[]> = {
 // silently discarded, because each stateless call rebuilt and then threw away
 // the cross-collection de-duplication.
 //
-// excludeIds lets "More Collections" ask for sets drawn from products not
-// already shown, so a re-fetch returns genuinely new collections rather than
-// the same deterministic result.
+// excludeIds carries products the shopper has already been shown. It serves two
+// jobs: "More Collections" asks for sets drawn from products not yet on screen,
+// and — since the session now accumulates ids across the whole conversation —
+// turn N no longer re-recommends what turn N-1 already offered.
 async function fetchCollections(
   department: string,
   prompt: string,
@@ -79,14 +82,29 @@ async function fetchCollections(
 
 export function useChat() {
   const { addChatHistory } = useShop()
+  const {
+    department,
+    selectDepartment: selectSessionDepartment,
+    shownProductIds,
+    recordTurn,
+    noteShown,
+    resetConversation,
+    clearSession,
+  } = useSession()
+
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isThinking, setIsThinking] = useState(false)
-  const [department, setDepartment] = useState<string | null>(null)
 
-  const selectDepartment = useCallback((dept: string) => {
-    setDepartment(dept)
-    setMessages([])
-  }, [])
+  // Department now lives in the session, not in this hook. Switching department
+  // still clears the on-screen transcript, but the department itself survives a
+  // refresh or a trip to /cart and back.
+  const selectDepartment = useCallback(
+    (dept: string) => {
+      selectSessionDepartment(dept)
+      setMessages([])
+    },
+    [selectSessionDepartment],
+  )
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -103,16 +121,28 @@ export function useChat() {
       setIsThinking(true)
 
       try {
-        const collections = await fetchCollections(department, trimmed)
+        // Everything already shown in this department is excluded, so the
+        // assistant behaves like someone who remembers what they just suggested.
+        const collections = await fetchCollections(
+          department,
+          trimmed,
+          capExclusions(shownProductIds),
+        )
 
         if (collections.length > 0) {
           addChatHistory(department, trimmed, collections)
         }
+        // Recorded even when empty, so an exhausted search still advances the
+        // conversation record rather than silently vanishing.
+        recordTurn(trimmed, collections)
 
         const assistantMessage: ChatMessage = {
           id: makeId(),
           role: 'assistant',
-          content: `${collections.length} collections for "${trimmed}"`,
+          content:
+            collections.length > 0
+              ? `${collections.length} collections for "${trimmed}"`
+              : `I couldn't build anything new for "${trimmed}" that you haven't already seen. Try a different occasion, or widen the budget.`,
           timestamp: new Date().toISOString(),
           collections,
         }
@@ -129,7 +159,7 @@ export function useChat() {
         setIsThinking(false)
       }
     },
-    [department, addChatHistory],
+    [department, addChatHistory, shownProductIds, recordTurn],
   )
 
   const loadMoreCollections = useCallback(
@@ -149,15 +179,20 @@ export function useChat() {
 
       try {
         const current = messages.find((m) => m.id === messageId)?.collections ?? []
-        const shownIds = Array.from(
-          new Set(current.flatMap((c) => c.items.map((it) => it.product.id).filter(Boolean))),
-        )
+        const visibleIds = current.flatMap((c) => c.items.map((it) => it.product.id))
         const shownSigs = new Set(current.map(sig))
 
-        const more = await fetchCollections(department, prompt, shownIds)
+        // Ids visible in this message come first so they always survive the
+        // cap — they are the repeats the shopper would notice immediately.
+        const more = await fetchCollections(
+          department,
+          prompt,
+          capExclusions(visibleIds, shownProductIds),
+        )
         const fresh = more.filter((c) => c.items.length > 0 && !shownSigs.has(sig(c)))
 
         if (fresh.length > 0) {
+          noteShown(fresh.flatMap((c) => c.items.map((it) => it.product.id)))
           setMessages((prev) =>
             prev.map((m) =>
               m.id === messageId
@@ -197,7 +232,7 @@ export function useChat() {
         setIsThinking(false)
       }
     },
-    [department, messages],
+    [department, messages, shownProductIds, noteShown],
   )
 
   const loadBrowseAll = useCallback(
@@ -209,31 +244,65 @@ export function useChat() {
           method: 'POST',
           body: JSON.stringify({ prompt: `${department}: ${prompt}` }),
         })
+        noteShown((response.products ?? []).map((p) => p.id))
         setMessages((prev) =>
           prev.map((m) => (m.id === messageId ? { ...m, response } : m)),
         )
+      } catch (err) {
+        // Previously this path had no catch at all: a failed request left the
+        // thinking indicator to be cleared by `finally` with no explanation on
+        // screen, so the button simply looked broken.
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: makeId(),
+            role: 'assistant',
+            content:
+              err instanceof Error
+                ? `Couldn't load the full list: ${err.message}`
+                : "Couldn't load the full list. Please try again.",
+            timestamp: new Date().toISOString(),
+          },
+        ])
       } finally {
         setIsThinking(false)
       }
     },
-    [department],
+    [department, noteShown],
   )
 
-  const restoreMessages = useCallback((msgs: ChatMessage[]) => {
-    setMessages(msgs)
-    setIsThinking(false)
-  }, [])
+  const restoreMessages = useCallback(
+    (msgs: ChatMessage[]) => {
+      setMessages(msgs)
+      setIsThinking(false)
+      // Reopening a past conversation puts its products back on screen, so they
+      // count as shown — otherwise the next turn could re-recommend exactly what
+      // the shopper is looking at.
+      noteShown(
+        msgs.flatMap((m) =>
+          (m.collections ?? []).flatMap((c) => c.items.map((it) => it.product.id)),
+        ),
+      )
+    },
+    [noteShown],
+  )
 
+  // "Change" — back to the department picker. Drops the whole session so the
+  // next department starts genuinely fresh.
   const clearChat = useCallback(() => {
     setMessages([])
     setIsThinking(false)
-    setDepartment(null)
-  }, [])
+    clearSession()
+  }, [clearSession])
 
+  // "New Chat" — same department, clean slate. Clears the conversation record
+  // and the shown-product memory for this department, so the shopper gets the
+  // best matches again rather than page two of what they already rejected.
   const resetMessages = useCallback(() => {
     setMessages([])
     setIsThinking(false)
-  }, [])
+    resetConversation()
+  }, [resetConversation])
 
   return {
     messages,

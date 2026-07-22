@@ -9,6 +9,8 @@ import {
   COLOR_OPTIONS,
   FALLBACK_BRANDS,
   GENDER_OPTIONS,
+  OCCASION_OPTIONS,
+  SIZE_OPTIONS,
   STYLE_OPTIONS,
   type BudgetBand,
 } from '@/data/personalizationOptions'
@@ -27,6 +29,8 @@ interface OnboardingFlowProps {
   // onSkip is offered only in onboarding mode — a shopper can always start
   // using the stylist and personalize later.
   onSkip?: () => void
+  // onClose dismisses the flow without saving (edit mode close button).
+  onClose?: () => void
 }
 
 // A single selectable pill used across the multi-select steps.
@@ -62,6 +66,7 @@ export function OnboardingFlow({
   onSave,
   onDone,
   onSkip,
+  onClose,
 }: OnboardingFlowProps) {
   const [step, setStep] = useState(0)
 
@@ -77,6 +82,8 @@ export function OnboardingFlow({
   const [styles, setStyles] = useState<string[]>(initial?.favoriteStyles ?? [])
   const [colors, setColors] = useState<string[]>(initial?.favoriteColors ?? [])
   const [categories, setCategories] = useState<string[]>(initial?.favoriteCategories ?? [])
+  const [occasions, setOccasions] = useState<string[]>(initial?.favoriteOccasions ?? [])
+  const [sizes, setSizes] = useState<string[]>(initial?.sizes ?? [])
   const [brands, setBrands] = useState<string[]>(initial?.favoriteBrands ?? [])
 
   // Live catalogue brands so a shopper's picks actually exist in the catalogue
@@ -113,6 +120,8 @@ export function OnboardingFlow({
     favoriteColors: colors,
     favoriteBrands: brands,
     favoriteCategories: categories,
+    favoriteOccasions: occasions,
+    sizes: sizes,
     onboarded: true,
   })
 
@@ -126,6 +135,7 @@ export function OnboardingFlow({
       { title: 'Which styles feel like you?', subtitle: 'Pick as many as you like.' },
       { title: 'Colours you reach for', subtitle: 'Pick as many as you like.' },
       { title: 'What do you shop for most?', subtitle: 'Pick as many as you like.' },
+      { title: 'What do you dress for?', subtitle: 'Occasions and sizes help us fit the moment.' },
       { title: 'Any brands you love?', subtitle: 'These get a gentle boost — never a hard filter.' },
     ],
     [mode],
@@ -170,6 +180,15 @@ export function OnboardingFlow({
             >
               Skip for now
               <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+          {mode === 'edit' && onClose && (
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-surface hover:text-ink-900"
+            >
+              <X className="h-4 w-4" />
             </button>
           )}
         </div>
@@ -292,6 +311,32 @@ export function OnboardingFlow({
               )}
 
               {step === 5 && (
+                <div className="space-y-5">
+                  <div>
+                    <span className="mb-2 block text-sm font-medium text-ink-900">Occasions you shop for</span>
+                    <div className="flex flex-wrap gap-2">
+                      {OCCASION_OPTIONS.map((o) => (
+                        <Chip
+                          key={o}
+                          label={o}
+                          selected={occasions.includes(o)}
+                          onToggle={() => toggle(occasions, o, setOccasions)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="mb-2 block text-sm font-medium text-ink-900">Your usual sizes</span>
+                    <div className="flex flex-wrap gap-2">
+                      {SIZE_OPTIONS.map((s) => (
+                        <Chip key={s} label={s} selected={sizes.includes(s)} onToggle={() => toggle(sizes, s, setSizes)} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 6 && (
                 <div className="flex max-h-[240px] flex-wrap gap-2 overflow-y-auto">
                   {brandOptions.map((b) => (
                     <Chip key={b} label={b} selected={brands.includes(b)} onToggle={() => toggle(brands, b, setBrands)} />

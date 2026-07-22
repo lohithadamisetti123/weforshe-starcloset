@@ -1,23 +1,43 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
 import type { ChatHistoryEntry, CollectionResponse } from '@/types'
 
-const KEY = 'myntra-chat-history'
 const MAX = 50 // keep the last 50 conversations
 
-function load(): ChatHistoryEntry[] {
-  try { return JSON.parse(localStorage.getItem(KEY) ?? '[]') }
+// Chat history stays on the client (it is a convenience log of prompts, not
+// account data the server needs), but the storage key is namespaced per user id
+// so two accounts sharing a browser never read each other's conversations. A
+// signed-out visitor gets no key at all.
+function keyFor(userId: string | null): string | null {
+  return userId ? `myntra-chat-history:${userId}` : null
+}
+
+function load(key: string | null): ChatHistoryEntry[] {
+  if (!key) return []
+  try { return JSON.parse(localStorage.getItem(key) ?? '[]') }
   catch { return [] }
 }
 
-function persist(entries: ChatHistoryEntry[]) {
-  try { localStorage.setItem(KEY, JSON.stringify(entries)) }
+function persist(key: string | null, entries: ChatHistoryEntry[]) {
+  if (!key) return
+  try { localStorage.setItem(key, JSON.stringify(entries)) }
   catch {}
 }
 
 export function useChatHistory() {
-  const [entries, setEntries] = useState<ChatHistoryEntry[]>(load)
+  const { user } = useAuth()
+  const userId = user?.id ?? null
+  const key = keyFor(userId)
 
-  useEffect(() => { persist(entries) }, [entries])
+  const [entries, setEntries] = useState<ChatHistoryEntry[]>(() => load(key))
+
+  // Re-read (or empty) whenever the signed-in identity changes, so switching
+  // accounts swaps the history instead of carrying it across.
+  useEffect(() => {
+    setEntries(load(keyFor(userId)))
+  }, [userId])
+
+  useEffect(() => { persist(key, entries) }, [key, entries])
 
   // Called from useChat every time an assistant reply with collections lands
   const addEntry = useCallback((

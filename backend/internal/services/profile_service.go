@@ -84,6 +84,8 @@ func (s *ProfileService) Update(ctx context.Context, userID uuid.UUID, req dto.U
 		FavoriteColors:     models.ToJSONB(orEmptyStrings(req.FavoriteColors)),
 		FavoriteBrands:     models.ToJSONB(orEmptyStrings(req.FavoriteBrands)),
 		FavoriteCategories: models.ToJSONB(orEmptyStrings(req.FavoriteCategories)),
+		FavoriteOccasions:  models.ToJSONB(orEmptyStrings(req.FavoriteOccasions)),
+		Sizes:              models.ToJSONB(orEmptyStrings(req.Sizes)),
 		Onboarded:          onboarded,
 	}
 	if req.Gender != "" {

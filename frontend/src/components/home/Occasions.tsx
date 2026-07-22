@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect, MouseEvent } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import type { MouseEvent } from 'react'
 import { motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import { Sparkles, ArrowRight, ArrowLeft } from 'lucide-react'
 
 const OCCASIONS = [
@@ -66,13 +68,15 @@ export function Occasions() {
   }
 
   return (
-    <section className="relative w-full bg-stone-50 pb-24 lg:pb-32 pt-0 overflow-hidden flex flex-col items-center border-t border-slate-100/60">
+    /* Added top padding pt-16 lg:pt-24 and removed bottom padding (pb-0) */
+    <section className="relative w-full bg-stone-50 pt-16 lg:pt-24 pb-0 overflow-hidden flex flex-col items-center border-t border-slate-100/60">
       
-      {/* Luxury Color Grading Ambient Atmosphere - Updated to Myntra Pink/Rose Gradations */}
+      {/* Luxury Color Grading Ambient Atmosphere */}
       <div className="absolute top-0 right-0 w-[900px] h-[700px] bg-gradient-to-b from-rose-500/5 via-pink-600/5 to-transparent blur-[180px] pointer-events-none -z-10" />
       <div className="absolute bottom-0 left-[-10%] w-[600px] h-[600px] bg-gradient-to-tr from-amber-400/5 via-transparent to-transparent blur-[140px] pointer-events-none -z-10" />
 
-      <div ref={containerRef} className="w-full max-w-[1440px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative z-10 mt-16">
+      {/* Adjusted top margin mt-8 lg:mt-12 for proper content flow */}
+      <div ref={containerRef} className="w-full max-w-[1440px] px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative z-10 mt-8 lg:mt-12">
         
         {/* --- LEFT SIDE: THE FIXED INTRO --- */}
         <div className="lg:col-span-4 lg:sticky lg:top-24 flex flex-col items-start text-left self-start">
@@ -82,7 +86,6 @@ export function Occasions() {
             transition={{ duration: 0.5 }}
             className="flex items-center gap-2 mb-4"
           >
-            {/* Myntra Color Line Accent */}
             <span className="h-[1px] w-6 bg-gradient-to-r from-rose-500 to-amber-500" />
             <span className="text-[10px] font-black tracking-[0.35em] text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600 uppercase">
               Curated Matrix
@@ -107,7 +110,6 @@ export function Occasions() {
             Let our generative design models parse your vibe and assemble precise outfit architectures for every conceptual setting.
           </motion.p>
 
-          {/* AI Style Engine Badge - Re-styled to Myntra theme */}
           <div className="mt-8 flex items-center gap-2.5 bg-rose-500/10 border border-rose-500/20 rounded-full px-4 py-1.5 text-[10px] font-bold text-rose-600 tracking-wider uppercase select-none">
             <Sparkles className="h-3 w-3 fill-rose-500 text-rose-500" />
             <span>AI Style Engine Active</span>
@@ -121,7 +123,7 @@ export function Occasions() {
             onMouseEnter={() => setIsAutoScrolling(false)}
             onMouseLeave={() => setIsAutoScrolling(true)}
             onTouchStart={() => setIsAutoScrolling(false)}
-            className="w-full overflow-x-auto pb-4 pt-2 scrollbar-none snap-x snap-mandatory touch-pan-x flex gap-8 will-change-transform"
+            className="w-full overflow-x-auto pb-0 pt-2 scrollbar-none snap-x snap-mandatory touch-pan-x flex gap-8 will-change-transform"
           >
             {OCCASIONS.map((occasion, index) => (
               <div 
@@ -134,7 +136,7 @@ export function Occasions() {
             ))}
           </div>
 
-          {/* Luxury Navigation Buttons - Re-styled to Myntra hover active states */}
+          {/* Navigation Controls */}
           <div className="flex items-center justify-end gap-3 px-2">
             <button
               onClick={() => handleManualScroll('left')}
@@ -190,7 +192,7 @@ function OccasionCard({ occasion, index, isInView }: { occasion: any, index: num
     y.set(0)
   }
 
-  const revealVariants = {
+  const revealVariants: Variants = {
     hidden: { opacity: 0, y: 50, filter: 'blur(10px)' },
     visible: { 
       opacity: 1, y: 0, filter: 'blur(0px)',
@@ -222,7 +224,7 @@ function OccasionCard({ occasion, index, isInView }: { occasion: any, index: num
         className="absolute inset-0 h-full w-full object-cover object-center pointer-events-none brightness-[0.85] group-hover:brightness-100 transition-all duration-700"
       />
 
-      {/* Interactive Cursor Glow - Switched from Gold to Myntra Rose Pink */}
+      {/* Interactive Cursor Glow */}
       <motion.div 
         style={{
           background: useTransform(
@@ -239,7 +241,6 @@ function OccasionCard({ occasion, index, isInView }: { occasion: any, index: num
         <span className="font-mono text-[10px] font-bold tracking-widest text-white/40 bg-black/30 backdrop-blur-md px-2 py-0.5 rounded">
           {occasion.num}
         </span>
-        {/* AI Spec Badge - Re-styled to Myntra Pink/Rose highlights */}
         <div className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-rose-500/30 bg-black/40 backdrop-blur-md text-[9px] font-black tracking-widest text-rose-400 uppercase shadow-sm">
           <Sparkles className="h-2.5 w-2.5 text-rose-400 fill-rose-400" />
           <span>AI Spec</span>
@@ -247,7 +248,6 @@ function OccasionCard({ occasion, index, isInView }: { occasion: any, index: num
       </div>
 
       <div className="absolute inset-x-0 bottom-0 p-6 z-20 flex flex-col justify-end overflow-hidden" style={{ transform: 'translateZ(30px)' }}>
-        {/* Insight Tag - Re-styled from dark amber to transparent crimson/rose blur */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 10 }}
@@ -275,14 +275,12 @@ function OccasionCard({ occasion, index, isInView }: { occasion: any, index: num
           <span className="text-[10px] font-mono tracking-wide text-white/50 truncate mr-2">
             "{occasion.prompt}"
           </span>
-          {/* Action Button Hover state updated to rose-500 */}
           <span className="p-1 rounded-full bg-white text-slate-900 group-hover/btn:bg-rose-500 group-hover/btn:text-white transition-colors duration-200 flex-shrink-0">
             <ArrowRight className="h-3 w-3" />
           </span>
         </motion.div>
       </div>
 
-      {/* Box Shadow Vibe - Changed from amber to deep rose glow */}
       <div className="absolute inset-0 rounded-[28px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10 shadow-[0_30px_60px_-15px_rgba(244,63,94,0.25)]" />
     </motion.div>
   )

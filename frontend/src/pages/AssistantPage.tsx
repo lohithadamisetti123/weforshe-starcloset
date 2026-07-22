@@ -2,8 +2,6 @@ import { useState, useCallback } from 'react'
 import { Clock } from 'lucide-react'
 import { ChatWindow } from '@/components/assistant/ChatWindow'
 import { HistorySidebar } from '@/components/assistant/HistorySidebar'
-import { OnboardingFlow } from '@/components/onboarding/OnboardingFlow'
-import { useProfile } from '@/hooks/useProfile'
 import { useShop } from '@/context/AppContext'
 import type { ChatHistoryEntry } from '@/types'
 
@@ -12,27 +10,9 @@ export function AssistantPage() {
   const { chatHistory } = useShop()
   const [reopenEntry, setReopenEntry] = useState<ChatHistoryEntry | null>(null)
 
-  // Onboarding gate: shown once, before the stylist, for a shopper who has not
-  // completed it. `dismissed` lets them skip for this session without blocking
-  // shopping. While the status is still loading (onboarded === null) we render
-  // the stylist rather than a spinner, so a returning shopper sees no flash.
-  const { onboarded, saving, save } = useProfile()
-  const [dismissed, setDismissed] = useState(false)
-  const showOnboarding = onboarded === false && !dismissed
-
-  if (showOnboarding) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-surface">
-        <OnboardingFlow
-          mode="onboarding"
-          saving={saving}
-          onSave={save}
-          onDone={() => setDismissed(true)}
-          onSkip={() => setDismissed(true)}
-        />
-      </div>
-    )
-  }
+  const handleReopen = useCallback((entry: ChatHistoryEntry) => {
+    setReopenEntry(entry)
+  }, [])
 
   return (
     <div className="relative bg-surface">

@@ -56,26 +56,6 @@ func DepartmentSupport(d Department) bool {
 	}
 }
 
-type slot struct {
-	Name       string
-	Categories []models.CategoryName
-	// Types, when set, hard-constrains the slot to a product type within the
-	// (usually broad) category — e.g. a "Bag" and a "Watch" slot both draw from
-	// Accessories but each is pinned to its own type so a collection never gets
-	// two of the same category (rule 4: no bag+bag). Type keys resolve against
-	// producttype.go. Empty means no type constraint.
-	Types []string
-	// ExcludeTypes hard-removes product types from a slot — e.g. the generic
-	// men's "Accessories" slot excludes "watch" so it can't pick a second watch
-	// after the dedicated Watch slot (rule 4).
-	ExcludeTypes []string
-	// Apparel marks a slot as satisfying the "every collection must contain at
-	// least one clothing item" rule (rule 3). At least one Apparel slot must be
-	// filled or the collection is rejected.
-	Apparel  bool
-	Optional bool
-}
-
 type outfitLeaning int
 
 const (
@@ -107,69 +87,6 @@ func leaningFor(intent *Intent) outfitLeaning {
 		}
 	}
 	return leaningWestern
-}
-
-func templateFor(dept Department, leaning outfitLeaning) []slot {
-	switch dept {
-	case DepartmentFootwear:
-		return []slot{{Name: "Footwear", Categories: []models.CategoryName{models.CategoryFootwear}}}
-	case DepartmentAccessories:
-		return []slot{{Name: "Accessories", Categories: []models.CategoryName{models.CategoryAccessories}}}
-	case DepartmentBeauty:
-		return []slot{{Name: "Beauty", Categories: []models.CategoryName{models.CategoryBeauty}}}
-	case DepartmentKidsGirls, DepartmentKidsBoys:
-		return []slot{
-			{Name: "Outfit", Categories: []models.CategoryName{models.CategoryKidsGirls, models.CategoryKidsBoys, models.CategoryDresses, models.CategoryTops}},
-			{Name: "Footwear", Categories: []models.CategoryName{models.CategoryFootwear}},
-			{Name: "Accessories", Categories: []models.CategoryName{models.CategoryAccessories}, Optional: true},
-		}
-	case DepartmentWomen:
-		if leaning == leaningEthnic {
-			return []slot{
-				{Name: "Outfit", Apparel: true, Categories: []models.CategoryName{
-					models.CategoryEthnicWear, models.CategoryKurtaSets, models.CategorySarees,
-				}},
-				{Name: "Footwear", Categories: []models.CategoryName{models.CategoryFootwear}},
-				{Name: "Jewellery", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"jewellery"}},
-				{Name: "Bag", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"handbag"}, Optional: true},
-				{Name: "Watch", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"watch"}, Optional: true},
-				{Name: "Beauty", Categories: []models.CategoryName{models.CategoryBeauty}, Optional: true},
-			}
-		}
-		return []slot{
-			{Name: "Top", Apparel: true, Categories: []models.CategoryName{models.CategoryDresses, models.CategoryTops}},
-			{Name: "Bottom", Apparel: true, Categories: []models.CategoryName{models.CategoryJeans}, Optional: true},
-			{Name: "Footwear", Categories: []models.CategoryName{models.CategoryFootwear}},
-			{Name: "Bag", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"handbag"}},
-			{Name: "Watch", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"watch"}, Optional: true},
-			{Name: "Jewellery", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"jewellery"}, Optional: true},
-			{Name: "Beauty", Categories: []models.CategoryName{models.CategoryBeauty}, Optional: true},
-		}
-	case DepartmentMen:
-		if leaning == leaningEthnic {
-			return []slot{
-				{Name: "Outfit", Apparel: true, Categories: []models.CategoryName{
-					models.CategoryEthnicWear, models.CategoryKurtaSets,
-				}},
-				{Name: "Footwear", Categories: []models.CategoryName{models.CategoryFootwear}},
-				{Name: "Watch", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"watch"}, Optional: true},
-				{Name: "Accessories", Categories: []models.CategoryName{models.CategoryAccessories}, Optional: true},
-			}
-		}
-		return []slot{
-			// Top apparel: shirt OR t-shirt (Tops) — mandatory clothing item.
-			{Name: "Top", Apparel: true, Categories: []models.CategoryName{models.CategoryShirts, models.CategoryTops}},
-			{Name: "Bottom", Apparel: true, Categories: []models.CategoryName{models.CategoryJeans}, Optional: true},
-			{Name: "Footwear", Categories: []models.CategoryName{models.CategoryFootwear}},
-			{Name: "Watch", Categories: []models.CategoryName{models.CategoryAccessories}, Types: []string{"watch"}},
-			// Men's carry/wear accessories: belt, wallet, backpack, cap — the
-			// generic Accessories slot picks the best non-watch item so it can't
-			// duplicate the Watch slot.
-			{Name: "Accessories", Categories: []models.CategoryName{models.CategoryAccessories}, ExcludeTypes: []string{"watch"}, Optional: true},
-		}
-	default:
-		return nil
-	}
 }
 
 func departmentGender(dept Department) *models.Gender {
@@ -290,43 +207,25 @@ func applyTheme(base *Intent, theme CollectionTheme) *Intent {
 	return &cp
 }
 
-// themeIndex maps the raw prompt to theme index 0, 1, or 2.
-//
-// The frontend (useChat.ts) appends a known suffix to each of the three
-// parallel requests so the backend can route them to different themes without
-// any server-side session state:
-//
-//	Call 1: <base prompt>                  → theme 0
-//	Call 2: <base prompt> + " minimal style"    → theme 1
-//	Call 3: <base prompt> + " bold colorful look" → theme 2
-//
-// This is 100% reliable — no hash collisions — and costs one strings.HasSuffix
-// per request.
-func themeIndex(prompt string) int {
-	switch {
-	case strings.HasSuffix(prompt, " bold colorful look"):
-		return 2
-	case strings.HasSuffix(prompt, " minimal style"):
-		return 1
-	default:
-		return 0
-	}
-}
-
 // BuildThemeCollections generates all three themed collections for a
-// department+prompt and returns them in rotation order starting at the
-// theme whose index matches the prompt hash.
-//
-// Why rotation instead of "pick best"?
-// The frontend calls this endpoint three times in parallel, each with a
-// slightly different prompt suffix (" minimal style", " bold colorful look").
-// Those suffixes shift the FNV hash so the three calls land on indices 0, 1, 2
-// in some order — guaranteeing the frontend receives three DIFFERENT themes and
-// therefore three collections with completely different products.
+// department+prompt in a single call, and returns them in a fixed order.
 //
 // Cross-collection uniqueness is enforced by passing each theme's picked
 // product IDs and brands as exclusions into the next theme, so a product that
-// appeared in theme 0 can never appear in theme 1 or 2.
+// appeared in theme 0 can never appear in theme 1 or 2. That guarantee is the
+// entire reason this function exists: the client used to fire three parallel
+// requests to the singular endpoint to get variety, but each of those calls
+// was stateless, so the de-duplication was computed and then discarded and the
+// three responses were free to overlap. Building all three together is what
+// makes "three genuinely different collections" true rather than aspirational.
+//
+// Ordering note: an earlier design rotated the starting theme based on a
+// suffix the client appended to the prompt (" minimal style", " bold colorful
+// look"), so that three separate stateless calls would land on three different
+// themes. The client no longer sends those suffixes — it makes one call and
+// receives the whole set — so the rotation had become dead code that always
+// started at 0. It has been removed rather than left to mislead: the order is
+// now plainly 0, 1, 2, and every theme is returned regardless.
 func (e *Engine) BuildThemeCollections(
 	ctx context.Context,
 	dept Department,
@@ -334,10 +233,7 @@ func (e *Engine) BuildThemeCollections(
 ) ([]*Collection, error) {
 	themes := themesFor(base, dept)
 
-	// Rotate so the starting theme is deterministic per prompt.
-	start := themeIndex(base.Query)
-
-	// Build all three themes in rotation order, carrying exclusions forward.
+	// Build all three themes in order, carrying exclusions forward.
 	// Seed with any exclusions already on the base intent (e.g. products the
 	// client has already been shown, for "More Collections") so they apply to
 	// every theme — applyTheme overwrites a theme's ExcludeProducts, so these
@@ -346,8 +242,10 @@ func (e *Engine) BuildThemeCollections(
 	usedProductIDs = append(usedProductIDs, base.ExcludeProducts...)
 	usedBrands := make([]string, 0, 12)
 
-	// order[i] = which theme slot to fill at step i
-	order := [3]int{start, (start + 1) % 3, (start + 2) % 3}
+	// order[i] = which theme slot to fill at step i. Fixed rather than rotated:
+	// exclusions accumulate along this order, so a stable order also makes the
+	// result reproducible for a given prompt.
+	order := [3]int{0, 1, 2}
 
 	out := make([]*Collection, 0, 3)
 
@@ -387,34 +285,97 @@ func normBrand(s string) string {
 	return strings.ToLower(strings.Join(strings.Fields(s), ""))
 }
 
-// cheapestInSlot returns the lowest price available in a slot's category pool.
-func (e *Engine) cheapestInSlot(ctx context.Context, sl slot, gender *models.Gender) int {
-	f := CandidateFilter{
-		Categories:   sl.Categories,
+// cheapestInSlot returns the lowest price available in a slot's candidate pool,
+// used to reserve budget for downstream mandatory slots.
+func (e *Engine) cheapestInSlot(ctx context.Context, spec SlotSpec, gender *models.Gender) int {
+	pool, err := e.source.Candidates(ctx, CandidateFilter{
+		Categories:   spec.Categories,
 		Gender:       gender,
-		Limit:        50,
+		Limit:        60,
 		StrictBudget: true,
-	}
-	pool, err := e.source.Candidates(ctx, f)
+	})
 	if err != nil || len(pool) == 0 {
 		return 0
 	}
-	min := pool[0].Price
-	for _, p := range pool[1:] {
-		if p.Price < min {
-			min = p.Price
+	best := 0
+	for _, p := range pool {
+		if !genderPermits(gender, p) || !specAcceptsProduct(spec, p) {
+			continue
+		}
+		if best == 0 || p.Price < best {
+			best = p.Price
 		}
 	}
-	return min
+	return best
 }
 
-// BuildCollection fills a department's slot template in priority order,
-// spending down the stated budget as it goes.
+// specAcceptsProduct is the hard admissibility test for a slot.
 //
-// NOTE: This function is unchanged from the working version — all diversity
-// improvements are layered on top via BuildThemeCollections, which calls this
-// function with a pre-modified intent. That way the slot-filling logic,
-// budget enforcement, and honesty checks remain exactly as before.
+// This single predicate is what makes the collection's structural guarantees
+// hold: a candidate must occupy one of the slot's garment roles, and must
+// satisfy any pinned product type. Everything else in the pipeline is scoring;
+// this is the part that cannot be outvoted by a high rating.
+func specAcceptsProduct(spec SlotSpec, p *models.Product) bool {
+	if p == nil {
+		return false
+	}
+	role := roleOf(p)
+	roleOK := false
+	for _, r := range spec.Roles {
+		if r == role {
+			roleOK = true
+			break
+		}
+	}
+	if !roleOK {
+		return false
+	}
+	if len(spec.Types) > 0 && !productMatchesAnyType(p, spec.Types) {
+		return false
+	}
+	return true
+}
+
+// consumeRoles marks the roles a chosen product occupies.
+//
+// A one-piece consumes Top and Bottom as well as OnePiece: a saree or a dress
+// *is* the top and the bottom, so the slots for those must not also be filled.
+// This is the rule that stops a skirt being stacked on a dress.
+func consumeRoles(consumed map[GarmentRole]bool, role GarmentRole) {
+	consumed[role] = true
+	if role == RoleOnePiece {
+		consumed[RoleTop] = true
+		consumed[RoleBottom] = true
+	}
+}
+
+// slotIsAvailable reports whether any of a slot's roles is still unfilled.
+func slotIsAvailable(consumed map[GarmentRole]bool, spec SlotSpec) bool {
+	for _, r := range spec.Roles {
+		if !consumed[r] {
+			return true
+		}
+	}
+	return false
+}
+
+// BuildCollection assembles one outfit for a department by filling a slot
+// template in order, spending down the stated budget as it goes.
+//
+// The pipeline per slot is: retrieve a wide pool → apply hard constraints
+// (gender, garment role, product type, budget) → score with the existing
+// relevance scorer and personalization boosts → add an outfit-compatibility
+// bonus computed against the pieces already chosen → take the argmax.
+//
+// Three guarantees hold structurally rather than by convention:
+//
+//   - Exactly one item per garment role. Roles are consumed as they are filled,
+//     and a one-piece consumes Top and Bottom, so no collection can contain two
+//     bottoms (the trouser-and-skirt bug) or a dress plus a skirt.
+//   - Gender is never violated. Every candidate passes genderPermits, applied
+//     after retrieval as well as in SQL, because retrieval only filters when an
+//     intent carries a gender and not every path sets one.
+//   - The budget is never exceeded. Slots are skipped rather than overspent.
 func (e *Engine) BuildCollection(ctx context.Context, dept Department, base *Intent) (*Collection, error) {
 	if base == nil {
 		base = NewIntent("")
@@ -423,8 +384,20 @@ func (e *Engine) BuildCollection(ctx context.Context, dept Department, base *Int
 		return nil, fmt.Errorf("recommendation: department %q has no catalogue support yet", dept)
 	}
 
-	template := templateFor(dept, leaningFor(base))
+	template, tmpl := resolveTemplate(dept, base)
+	if len(template) == 0 {
+		return nil, fmt.Errorf("recommendation: no slot template for department %q", dept)
+	}
+
+	// Gender is resolved once, from the department, and applied to every slot.
+	// When the department is gender-agnostic (Footwear, Accessories, Beauty) we
+	// fall back to whatever the prompt asked for, so "women's heels" stays
+	// women's even though the department itself carries no gender.
 	gender := departmentGender(dept)
+	if gender == nil && base.Gender != nil {
+		g := *base.Gender
+		gender = &g
+	}
 
 	var remaining *int
 	if base.Budget.HasMax() {
@@ -434,114 +407,78 @@ func (e *Engine) BuildCollection(ctx context.Context, dept Department, base *Int
 
 	items := make([]CollectionItem, 0, len(template))
 	skipped := make([]string, 0)
-	droppedBottom := false
+	consumed := make(map[GarmentRole]bool, 8)
+	excluded := append([]string{}, base.ExcludeProducts...)
+	var anchor *models.Product
 	hasApparel := false
 
-	for i, sl := range template {
-		if sl.Name == "Bottom" && droppedBottom {
+	for i, spec := range template {
+		// A role already filled (e.g. Bottom after a dress) is not a skip — the
+		// slot simply does not apply to this outfit.
+		if !slotIsAvailable(consumed, spec) {
+			continue
+		}
+		if remaining != nil && *remaining <= 0 {
+			skipped = append(skipped, spec.Name)
 			continue
 		}
 
-		slotIntent := *base
-		slotIntent.CategoryIn = sl.Categories
-		slotIntent.Category = nil
-		slotIntent.Gender = gender
-		// Pin a typed slot (Bag→handbag, Watch→watch) to its type so the pool is
-		// type-relevant; a hard post-filter below guarantees it. Untyped slots
-		// keep any query-driven type (so "saree collection" keeps the saree
-		// constraint on its apparel slot).
-		if len(sl.Types) > 0 {
-			slotIntent.TypeTerms = sl.Types
-		}
-		slotIntent.Sort = SortRelevance
-		slotIntent.StrictBudget = remaining != nil
+		// Reserve enough budget for the remaining mandatory slots so an
+		// expensive top cannot starve the shoes.
+		slotCap := 0
 		if remaining != nil {
-			if *remaining <= 0 {
-				skipped = append(skipped, sl.Name)
-				continue
-			}
-			slotCap := *remaining
+			slotCap = *remaining
 			for j := i + 1; j < len(template); j++ {
-				// Skip optional slots (Bottom) when reserving budget.
-				// Bottom is dropped when Top picks a Dress, so pre-reserving
-				// its cost starves the Top slot and causes it to be skipped —
-				// leaving the shopper with jeans + footwear instead of an outfit.
-				if template[j].Optional {
+				if template[j].Optional || !slotIsAvailable(consumed, template[j]) {
 					continue
 				}
-				downstreamMin := e.cheapestInSlot(ctx, template[j], gender)
-				if downstreamMin > 0 && slotCap-downstreamMin > 0 {
-					slotCap -= downstreamMin
+				if floor := e.cheapestInSlot(ctx, template[j], gender); floor > 0 && slotCap-floor > 0 {
+					slotCap -= floor
 				}
 			}
-			slotBudget := BudgetRange{Max: &slotCap}
-			slotIntent.Budget = &slotBudget
 		}
 
-		result, err := e.Recommend(ctx, &slotIntent)
-		if err != nil {
-			return nil, fmt.Errorf("recommendation: filling slot %s: %w", sl.Name, err)
-		}
-		if len(result.Products) == 0 {
-			skipped = append(skipped, sl.Name)
+		pick := e.pickForSlot(ctx, spec, tmpl, base, gender, excluded, slotCap, anchor, items)
+		if pick == nil {
+			skipped = append(skipped, spec.Name)
 			continue
 		}
-
-		// Hard type constraint (rules 4 & 9): a typed slot MUST be filled by a
-		// product of that type, and ExcludeTypes are never allowed. If nothing
-		// qualifies we skip the slot rather than substitute a wrong-type item.
-		candidates := result.Products
-		if len(sl.Types) > 0 || len(sl.ExcludeTypes) > 0 {
-			filtered := candidates[:0:0]
-			for _, sp := range candidates {
-				if len(sl.Types) > 0 && !productMatchesAnyType(sp.Product, sl.Types) {
-					continue
-				}
-				if len(sl.ExcludeTypes) > 0 && productMatchesAnyType(sp.Product, sl.ExcludeTypes) {
-					continue
-				}
-				filtered = append(filtered, sp)
-			}
-			candidates = filtered
-		}
-		if len(candidates) == 0 {
-			skipped = append(skipped, sl.Name)
-			continue
-		}
-
-		pick := candidates[0]
-
 		if remaining != nil && pick.Product.Price > *remaining {
-			skipped = append(skipped, sl.Name)
+			skipped = append(skipped, spec.Name)
 			continue
 		}
 
-		items = append(items, CollectionItem{Slot: sl.Name, Product: pick})
-		if sl.Apparel {
+		items = append(items, CollectionItem{Slot: spec.Name, Product: *pick})
+		role := roleOf(pick.Product)
+		consumeRoles(consumed, role)
+		if role.IsApparel() {
 			hasApparel = true
+			if anchor == nil {
+				// The first apparel piece anchors the look: everything after it
+				// is chosen to go with it.
+				anchor = pick.Product
+			}
 		}
-
-		// Exclude this product from all subsequent slots so the same item
-		// can never appear twice within one collection, even if future
-		// template changes introduce overlapping category pools.
-		base.ExcludeProducts = append(base.ExcludeProducts, pick.Product.ID.String())
+		excluded = append(excluded, pick.Product.ID.String())
 
 		if remaining != nil {
 			v := *remaining - pick.Product.Price
 			remaining = &v
 		}
-		if sl.Name == "Top" && pick.Product.Category != nil && pick.Product.Category.Name == models.CategoryDresses {
-			droppedBottom = true
-		}
 	}
 
-	// Rule 3: an outfit collection MUST contain at least one clothing item.
-	// This only applies to templates that HAVE an apparel slot — single-category
-	// departments (Footwear, Accessories, Beauty, Home) legitimately have none.
+	// An outfit collection must contain at least one clothing item. Templates
+	// that have no apparel slot at all (Footwear, Accessories, Beauty) are
+	// exempt — they are browses, not outfits.
 	templateHasApparel := false
-	for _, sl := range template {
-		if sl.Apparel {
-			templateHasApparel = true
+	for _, spec := range template {
+		for _, r := range spec.Roles {
+			if r.IsApparel() {
+				templateHasApparel = true
+				break
+			}
+		}
+		if templateHasApparel {
 			break
 		}
 	}
@@ -565,6 +502,111 @@ func (e *Engine) BuildCollection(ctx context.Context, dept Department, base *Int
 		c.BudgetLimit = base.Budget.Max
 	}
 	return c, nil
+}
+
+// pickForSlot retrieves, filters, scores and selects the single best product
+// for one slot. It returns nil when nothing admissible is available, which the
+// caller records as a skipped slot rather than filling with a wrong-role item.
+func (e *Engine) pickForSlot(
+	ctx context.Context,
+	spec SlotSpec,
+	tmpl OccasionTemplate,
+	base *Intent,
+	gender *models.Gender,
+	excluded []string,
+	slotCap int,
+	anchor *models.Product,
+	picked []CollectionItem,
+) *ScoredProduct {
+	filter := CandidateFilter{
+		Categories:      spec.Categories,
+		Gender:          gender,
+		ExcludeColors:   base.ExcludeColors,
+		ExcludeStyles:   base.ExcludeStyles,
+		ExcludeBrands:   base.ExcludeBrands,
+		ExcludeProducts: excluded,
+		// A wide pool matters here: the role filter below discards most of it
+		// (a Bottom slot pulls from categories that are mostly tops), so a
+		// TopN-sized pool would routinely leave a slot empty.
+		Limit:        240,
+		StrictBudget: slotCap > 0,
+	}
+	if slotCap > 0 {
+		ceiling := slotCap
+		filter.MaxPrice = &ceiling
+	}
+
+	pool, err := e.source.Candidates(ctx, filter)
+	if err != nil || len(pool) == 0 {
+		return nil
+	}
+
+	// Hard constraints. Nothing below this point can rescue a candidate that
+	// fails here — that is what makes these guarantees rather than preferences.
+	admissible := make([]*models.Product, 0, len(pool))
+	for _, p := range pool {
+		if p == nil {
+			continue
+		}
+		if !genderPermits(gender, p) {
+			continue
+		}
+		if !specAcceptsProduct(spec, p) {
+			continue
+		}
+		if slotCap > 0 && p.Price > slotCap {
+			continue
+		}
+		admissible = append(admissible, p)
+	}
+	if len(admissible) == 0 {
+		return nil
+	}
+
+	// Score with the existing relevance scorer so occasion, style, colour,
+	// budget fit, rating and popularity all keep their established meaning,
+	// then layer the shopper's personalization boosts on top.
+	slotIntent := *base
+	slotIntent.CategoryIn = spec.Categories
+	slotIntent.Category = nil
+	slotIntent.Gender = gender
+	slotIntent.Sort = SortRelevance
+	if len(spec.Types) > 0 {
+		slotIntent.TypeTerms = spec.Types
+	}
+	if slotCap > 0 {
+		slotBudget := BudgetRange{Max: &slotCap}
+		slotIntent.Budget = &slotBudget
+	}
+
+	scored := e.scorer.ScoreAll(&slotIntent, admissible)
+	ApplyPersonalization(scored, &slotIntent)
+	if len(scored) == 0 {
+		return nil
+	}
+
+	// Outfit compatibility decides between candidates the scorer rates
+	// similarly — which is what turns a ranked list into a styled look.
+	bestIdx := 0
+	bestScore := -1.0
+	for i := range scored {
+		if scored[i].Product == nil {
+			continue
+		}
+		s := scored[i].Score + compatibilityBonus(scored[i].Product, spec, tmpl, anchor, picked)
+		if s > bestScore {
+			bestScore, bestIdx = s, i
+		}
+	}
+	if bestScore < 0 {
+		return nil
+	}
+
+	pick := scored[bestIdx]
+	pick.Score = clamp01(bestScore)
+	pick.Rank = 1
+	pick.FinalScore = pick.Score
+	return &pick
 }
 
 func collectionTitle(dept Department, intent *Intent) string {

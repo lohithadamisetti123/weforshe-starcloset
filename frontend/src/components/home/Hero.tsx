@@ -6,7 +6,6 @@ const BANNER_IMAGES = [
   'src/assets/images/hero/image1.png', 
   'src/assets/images/hero/image2.png',
   'src/assets/images/hero/image3.png',
-  'src/assets/images/hero/image4.png',
   'src/assets/images/hero/image5.png',
 ]
 

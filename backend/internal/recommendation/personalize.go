@@ -38,13 +38,13 @@ import (
 // must still be shown wedding sarees first, with their preferred brand
 // surfacing among them — never a casual tee from that brand ahead of the saree.
 type BoostWeights struct {
-	PreferredBrand      float64
-	PreferredColor      float64
-	PreferredStyle      float64
-	PreferredCategory   float64
-	PurchasedBrand      float64
-	PurchasedCategory   float64
-	Location            float64
+	PreferredBrand    float64
+	PreferredColor    float64
+	PreferredStyle    float64
+	PreferredCategory float64
+	PurchasedBrand    float64
+	PurchasedCategory float64
+	Location          float64
 }
 
 // DefaultBoostWeights are tuned so that a product hitting several preferences
@@ -278,16 +278,16 @@ var cityPriors = map[string]cityPrior{
 	"goa":       {styles: []models.StyleTag{models.StyleCasual, models.StyleWestern}, colorHints: []string{"white", "floral", "bright"}},
 
 	// Cooler / layering leanings.
-	"delhi":     {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}, colorHints: []string{"black", "navy", "grey", "maroon", "dark"}},
-	"new delhi": {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}, colorHints: []string{"black", "navy", "grey", "maroon", "dark"}},
-	"gurgaon":   {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}},
-	"noida":     {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}},
+	"delhi":      {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}, colorHints: []string{"black", "navy", "grey", "maroon", "dark"}},
+	"new delhi":  {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}, colorHints: []string{"black", "navy", "grey", "maroon", "dark"}},
+	"gurgaon":    {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}},
+	"noida":      {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}},
 	"chandigarh": {styles: []models.StyleTag{models.StyleFormal}, categories: []models.CategoryName{models.CategoryBlazers}},
-	"jaipur":    {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategoryEthnicWear}},
-	"lucknow":   {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategoryKurtaSets}},
+	"jaipur":     {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategoryEthnicWear}},
+	"lucknow":    {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategoryKurtaSets}},
 
 	// Strong ethnic / festive wardrobe culture.
-	"kolkata": {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategorySarees, models.CategoryEthnicWear}},
+	"kolkata":   {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategorySarees, models.CategoryEthnicWear}},
 	"ahmedabad": {styles: []models.StyleTag{models.StyleEthnic}, categories: []models.CategoryName{models.CategoryEthnicWear, models.CategoryKurtaSets}},
 }
 

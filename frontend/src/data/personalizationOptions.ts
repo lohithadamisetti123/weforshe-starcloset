@@ -61,6 +61,28 @@ export const COLOR_OPTIONS: string[] = [
   'Floral',
 ]
 
+// Occasions map onto the catalogue's occasion vocabulary, so a preferred
+// occasion both seeds the personalized feed and reinforces the engine's
+// occasion scoring.
+export const OCCASION_OPTIONS: string[] = [
+  'Wedding',
+  'Festival',
+  'Office',
+  'Party',
+  'College',
+  'Casual',
+  'Travel',
+  'Date Night',
+  'Brunch',
+  'Anniversary',
+  'Diwali',
+  'Gym',
+]
+
+// Apparel sizes. Stored on the profile and shown back to the shopper; the
+// current catalogue has no size dimension, so these do not yet affect ranking.
+export const SIZE_OPTIONS: string[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Free Size']
+
 // Cities the location signal recognises (a soft climate/culture prior). Free
 // text is allowed too — an unknown city simply contributes no location boost.
 export const CITY_OPTIONS: string[] = [
