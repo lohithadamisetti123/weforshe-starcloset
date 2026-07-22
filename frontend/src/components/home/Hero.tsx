@@ -2,11 +2,16 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Ticket, Percent, Zap } from 'lucide-react'
 
+import image1 from '@/assets/images/hero/image1.png'
+import image2 from '@/assets/images/hero/image2.png'
+import image3 from '@/assets/images/hero/image3.png'
+import image5 from '@/assets/images/hero/image5.png'
+
 const BANNER_IMAGES = [
-  'src/assets/images/hero/image1.png', 
-  'src/assets/images/hero/image2.png',
-  'src/assets/images/hero/image3.png',
-  'src/assets/images/hero/image5.png',
+  image1,
+  image2,
+  image3,
+  image5,
 ]
 
 const TICKER_ITEMS = [
