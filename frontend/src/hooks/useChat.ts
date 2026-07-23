@@ -17,8 +17,8 @@ function makeId() {
 export const departmentPrompts: Record<string, string[]> = {
   Women: [
     'Wedding collection under ₹10000',
-    'Office wear for summer',
     'Party collection under ₹3000',
+    'Office wear under ₹5000',
     'Casual college outfits',
     'Vacation collection',
     'Navratri festive look',
