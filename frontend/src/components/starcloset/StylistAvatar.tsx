@@ -47,6 +47,8 @@ export function StylistAvatar({ persona, size = 'md', locked = false, className 
         <img
           src={persona.portraitUrl}
           alt={persona.displayName}
+          loading="lazy"
+          decoding="async"
           className="h-full w-full object-cover"
           onError={() => setImgOk(false)}
         />

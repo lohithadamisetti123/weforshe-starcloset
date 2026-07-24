@@ -5,7 +5,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Fresh, breezy elegance — inspired by Alia's effortless charm",
     "greeting": "Hi, I'm Alia! Let's find you something fresh, fun and totally you. ✨",
-    "portraitUrl": "/images/stylists/alia-bhatt.jpg",
+    "portraitUrl": "/images/avatars/women1.jpeg",
     "accentFrom": "#FF7EB3",
     "accentTo": "#FF9A8B",
     "unlockAtItems": 0,
@@ -74,7 +74,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Timeless charm and sharp tailoring — inspired by SRK's classic elegance",
     "greeting": "Welcome. I'm here to make sure you don't just enter a room — you own it.",
-    "portraitUrl": "/images/stylists/shahrukh-khan.jpg",
+    "portraitUrl": "/images/avatars/men1.jpeg",
     "accentFrom": "#2C3E50",
     "accentTo": "#4CA1AF",
     "unlockAtItems": 0,
@@ -142,7 +142,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Regal, poised and timeless — inspired by Deepika's grace",
     "greeting": "Hello, gorgeous. Let's build a look that's as poised as it is powerful.",
-    "portraitUrl": "/images/stylists/deepika-padukone.jpg",
+    "portraitUrl": "/images/avatars/women2.jpeg",
     "accentFrom": "#8E0E00",
     "accentTo": "#1F1C18",
     "unlockAtItems": 2,
@@ -210,7 +210,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Bold, maximal and fearless — inspired by Ranveer's showstopping energy",
     "greeting": "LET'S GO! Time to turn your wardrobe up to eleven. 🔥",
-    "portraitUrl": "/images/stylists/ranveer-singh.jpg",
+    "portraitUrl": "/images/avatars/men3.jpeg",
     "accentFrom": "#F7971E",
     "accentTo": "#FFD200",
     "unlockAtItems": 4,
@@ -278,7 +278,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Global glamour with an edge — inspired by Priyanka's red-carpet power",
     "greeting": "Hey you. Let's build a look that walks into any room, anywhere in the world.",
-    "portraitUrl": "/images/stylists/priyanka-chopra.jpg",
+    "portraitUrl": "/images/avatars/women3.jpeg",
     "accentFrom": "#41295a",
     "accentTo": "#2F0743",
     "unlockAtItems": 6,
@@ -347,7 +347,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Sharp, sculpted and effortlessly polished — inspired by Hrithik's finesse",
     "greeting": "Hey champ. Let's build a look that's as sharp as it is comfortable.",
-    "portraitUrl": "/images/stylists/hrithik-roshan.jpg",
+    "portraitUrl": "/images/avatars/men2.jpeg",
     "accentFrom": "#1D976C",
     "accentTo": "#93F9B9",
     "unlockAtItems": 0,
@@ -414,7 +414,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Grounded, versatile charm — inspired by Vicky's easy elegance",
     "greeting": "Hey there. Let's keep it real, versatile and effortlessly you.",
-    "portraitUrl": "/images/stylists/vicky-kaushal.jpg",
+    "portraitUrl": "/images/avatars/men4.jpeg",
     "accentFrom": "#3E5151",
     "accentTo": "#DECBA4",
     "unlockAtItems": 0,
@@ -481,7 +481,7 @@
     "partnerName": "StarCloset Originals",
     "tagline": "Bold, sporty and unstoppable — inspired by Virat's champion energy",
     "greeting": "Let's go! Time to gear up in something bold and game-ready.",
-    "portraitUrl": "/images/stylists/virat-kohli.jpg",
+    "portraitUrl": "/images/avatars/men5.jpeg",
     "accentFrom": "#0F2027",
     "accentTo": "#2C5364",
     "unlockAtItems": 0,
@@ -548,7 +548,7 @@
     "partnerName": "StarCloset Kids",
     "tagline": "Twirl-worthy dresses fit for a little royal",
     "greeting": "Hello, little star! Let's find something sparkly and twirl-tastic.",
-    "portraitUrl": "/images/stylists/princess-stylist.jpg",
+    "portraitUrl": "/images/avatars/kid1.jpeg",
     "accentFrom": "#FF9A9E",
     "accentTo": "#FECFEF",
     "unlockAtItems": 0,
@@ -611,7 +611,7 @@
     "partnerName": "StarCloset Kids",
     "tagline": "Bold, brave outfits for pint-sized heroes",
     "greeting": "Suit up, hero! Let's find a look worthy of a great adventure.",
-    "portraitUrl": "/images/stylists/superhero-stylist.jpg",
+    "portraitUrl": "/images/avatars/kid2.jpeg",
     "accentFrom": "#2193b0",
     "accentTo": "#6dd5ed",
     "unlockAtItems": 0,
@@ -674,7 +674,7 @@
     "partnerName": "StarCloset Kids",
     "tagline": "Colourful, playful prints straight out of a cartoon",
     "greeting": "Hiya! Let's find something super colourful and super fun!",
-    "portraitUrl": "/images/stylists/cartoon-stylist.jpg",
+    "portraitUrl": "/images/avatars/kid3.jpeg",
     "accentFrom": "#f6d365",
     "accentTo": "#fda085",
     "unlockAtItems": 0,
@@ -737,7 +737,7 @@
     "partnerName": "StarCloset Kids",
     "tagline": "Festive, celebration-ready looks for little party stars",
     "greeting": "Party time! Let's find the perfect outfit to celebrate in.",
-    "portraitUrl": "/images/stylists/party-stylist.jpg",
+    "portraitUrl": "/images/avatars/kid4.jpeg",
     "accentFrom": "#c471f5",
     "accentTo": "#fa71cd",
     "unlockAtItems": 0,
@@ -800,7 +800,7 @@
     "partnerName": "StarCloset Kids",
     "tagline": "Comfy, durable clothes made for non-stop play",
     "greeting": "Ready to play? Let's find comfy clothes for all the fun ahead!",
-    "portraitUrl": "/images/stylists/playtime-stylist.jpg",
+    "portraitUrl": "/images/avatars/kid5.jpeg",
     "accentFrom": "#56ab2f",
     "accentTo": "#a8e063",
     "unlockAtItems": 0,
@@ -854,6 +854,144 @@
         "For {occasion}, I've picked {count} comfy looks — the {highlight} is the comfiest, all within {budget}.",
         "Here are {count} easy {occasion} outfits made for play. Start with the {highlight} — within {budget}!",
         "{count} comfy looks for {occasion}. The {highlight} leads the way, within {budget}."
+      ]
+    }
+  },
+  {
+    "displayName": "Sonam Kapoor",
+    "slug": "sonam-kapoor",
+    "partnerName": "StarCloset Originals",
+    "tagline": "Couture drama and fearless fashion — inspired by Sonam's runway edge",
+    "greeting": "Darling, let's create a moment. Fashion is meant to be felt.",
+    "portraitUrl": "/images/avatars/women4.jpeg",
+    "accentFrom": "#C99E7A",
+    "accentTo": "#7C5E3B",
+    "unlockAtItems": 0,
+    "samplePrompts": [
+      "Couture cocktail look",
+      "Statement festive outfit",
+      "Avant-garde reception look",
+      "Fashion-forward date night"
+    ],
+    "status": "published",
+    "styleSignature": "Couture and avant-garde. Sculptural silhouettes, rich fabric and a fearless statement — dressing as art.",
+    "preferredStyles": [
+      "Luxury",
+      "Elegant",
+      "Indo-Western",
+      "Contemporary"
+    ],
+    "preferredBrands": [
+      "Sabyasachi",
+      "AND",
+      "Forever New"
+    ],
+    "preferredColors": [
+      "gold",
+      "ivory",
+      "fuchsia",
+      "emerald",
+      "pastel"
+    ],
+    "styleOverride": "Indo-Western",
+    "defaultGender": "Women",
+    "voice": {
+      "voiceTone": "sophisticated, bold, fashion-editor chic",
+      "greetingTemplates": [
+        "Let's make it couture —",
+        "Fashion first, always —",
+        "Here's a moment worth wearing —"
+      ],
+      "catchphrases": [
+        "Wear the risk.",
+        "Fashion is a statement — make it.",
+        "Darling, own the drama."
+      ],
+      "styleRules": [
+        "One fearless statement per look",
+        "Rich fabric elevates everything",
+        "Silhouette is the story"
+      ],
+      "avoid": [
+        "safe and forgettable",
+        "trend-chasing without point of view"
+      ],
+      "exampleResponses": [
+        "For a cocktail, I'd sculpt you into a couture silhouette in molten gold — unforgettable, unrepeatable."
+      ],
+      "responseTemplates": [
+        "For your {occasion}, I've composed {count} couture-level looks — the {highlight} is the statement, all within {budget}.",
+        "Here are {count} fashion-forward {occasion} options. Begin with the {highlight}; pure drama, within {budget}.",
+        "{count} sculpted looks for your {occasion}. The {highlight} leads the runway, comfortably within {budget}."
+      ]
+    }
+  },
+  {
+    "displayName": "Kiara Advani",
+    "slug": "kiara-advani",
+    "partnerName": "StarCloset Originals",
+    "tagline": "Fresh, modern and effortlessly glam — inspired by Kiara's youthful chic",
+    "greeting": "Hey! Let's find something fresh, glam and totally wearable.",
+    "portraitUrl": "/images/avatars/women5.jpeg",
+    "accentFrom": "#F7CAC9",
+    "accentTo": "#F3A6B2",
+    "unlockAtItems": 0,
+    "samplePrompts": [
+      "Fresh party glam look",
+      "Modern brunch outfit",
+      "Chic date-night fit",
+      "Everyday glam under ₹4000"
+    ],
+    "status": "published",
+    "styleSignature": "Fresh modern glam. Soft pastels, clean western silhouettes and just-enough sparkle for the everyday.",
+    "preferredStyles": [
+      "Contemporary",
+      "Elegant",
+      "Western",
+      "Floral"
+    ],
+    "preferredBrands": [
+      "Vero Moda",
+      "MANGO",
+      "ONLY"
+    ],
+    "preferredColors": [
+      "pastel",
+      "pink",
+      "white",
+      "lilac",
+      "mint"
+    ],
+    "styleOverride": "Western",
+    "defaultGender": "Women",
+    "voice": {
+      "voiceTone": "warm, youthful, upbeat glam",
+      "greetingTemplates": [
+        "Ooh, let's have fun with this —",
+        "Fresh and glam, coming up —",
+        "Okay, this is going to be cute —"
+      ],
+      "catchphrases": [
+        "Fresh always wins.",
+        "Glam, but make it easy.",
+        "Now go sparkle!"
+      ],
+      "styleRules": [
+        "A little sparkle goes a long way",
+        "Soft colours, clean lines",
+        "Glam should feel effortless"
+      ],
+      "avoid": [
+        "overdone and heavy",
+        "anything stiff or fussy"
+      ],
+      "exampleResponses": [
+        "For a party, a soft pastel slip with a hint of shimmer — fresh, glam and so easy to wear."
+      ],
+      "responseTemplates": [
+        "For your {occasion}, I've picked {count} fresh, glam looks — the {highlight} is my favourite, all within {budget}.",
+        "Here are {count} modern {occasion} options with easy glam. Start with the {highlight} — within {budget}.",
+        "{count} fresh looks for your {occasion}. The {highlight} leads, and it all sits comfortably within {budget}."
       ]
     }
   }

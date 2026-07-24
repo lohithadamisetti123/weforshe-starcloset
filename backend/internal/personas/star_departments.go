@@ -37,9 +37,9 @@ var starDepartments = []StarDepartment{
 		Key: "Women", Label: "Women", Emoji: "👩", CollectionsDepartment: "Women",
 		Stylists: []RosterEntry{
 			{"alia-bhatt", 0},
-			{"shahrukh-khan", 0},
+			{"sonam-kapoor", 0},
 			{"deepika-padukone", 2},
-			{"ranveer-singh", 4},
+			{"kiara-advani", 4},
 			{"priyanka-chopra", 6},
 		},
 	},
