@@ -27,6 +27,7 @@ import (
 	"github.com/myntra/bharat-ai-backend/internal/handlers"
 	"github.com/myntra/bharat-ai-backend/internal/middleware"
 	"github.com/myntra/bharat-ai-backend/internal/personalization"
+	"github.com/myntra/bharat-ai-backend/internal/personas"
 	"github.com/myntra/bharat-ai-backend/internal/recommendation"
 	"github.com/myntra/bharat-ai-backend/internal/repositories"
 	"github.com/myntra/bharat-ai-backend/internal/routes"
@@ -162,6 +163,16 @@ func run() error {
 		}()
 	}
 
+	// --- StarCloset personas --------------------------------------------------
+	// The stylist roster is file-backed (data/personas.json), seeded from the
+	// embedded default on first boot. It is intentionally not in Postgres: a
+	// persona is content, edited through the partner portal, not transactional
+	// data — see internal/personas.
+	personaStore, err := personas.DefaultStore()
+	if err != nil {
+		return fmt.Errorf("loading personas: %w", err)
+	}
+
 	tokens := utils.NewTokenManager(cfg.JWT.Secret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)
 
 	// --- Services -------------------------------------------------------------
@@ -176,7 +187,8 @@ func run() error {
 	personalizer := personalization.NewBuilder(userProfileRepo, pastOrderRepo, log)
 
 	assistantService := services.NewAssistantService(
-		ruleExtractor, geminiExtractor, engine, recommendationRepo, historyRepo, cache, personalizer, log)
+		ruleExtractor, geminiExtractor, engine, recommendationRepo, historyRepo, cache, personalizer, personaStore, log)
+	personaService := services.NewPersonaService(personaStore, log)
 	profileService := services.NewProfileService(userProfileRepo, pastOrderRepo, productRepo, log)
 	historyService := services.NewHistoryService(historyRepo, cache, log)
 	recommendationService := services.NewRecommendationService(recommendationRepo, log)
@@ -197,6 +209,7 @@ func run() error {
 		Dashboard:      handlers.NewDashboardHandler(dashboardService),
 		Profile:        handlers.NewProfileHandler(profileService, val),
 		Cart:           handlers.NewCartHandler(cartService, val),
+		Persona:        handlers.NewPersonaHandler(personaService, val),
 	}
 
 	router := buildRouter(cfg, log)

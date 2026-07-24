@@ -50,7 +50,7 @@ export function RecommendationsPage() {
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-brand-500">Dashboard</p>
         <h1 className="text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">Recommendation Dashboard</h1>
-        <p className="max-w-xl text-ink-500">A live snapshot of how Bharat AI is styling shoppers right now.</p>
+        <p className="max-w-xl text-ink-500">A live snapshot of how StarCloset stylists are styling shoppers right now.</p>
       </div>
 
       {/* ── Personalized "For You" feed, generated from the saved profile ── */}

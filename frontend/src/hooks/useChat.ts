@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useShop } from '@/context/AppContext'
 import { useSession } from '@/context/SessionContext'
+import { usePersona } from '@/context/PersonaContext'
 import { capExclusions } from '@/context/sessionState'
 import { apiFetch } from '@/lib/api'
 import type {
@@ -81,21 +82,24 @@ export const departmentPrompts: Record<string, string[]> = {
 async function fetchCollections(
   department: string,
   prompt: string,
+  personaSlug: string | null,
   excludeIds: string[] = [],
-): Promise<CollectionResponse[]> {
+): Promise<{ collections: CollectionResponse[]; stylistReply: string }> {
   const res = await apiFetch<CollectionsResponse>('/assistant/collections', {
     method: 'POST',
     body: JSON.stringify({
       department,
       prompt,
+      ...(personaSlug ? { personaSlug } : {}),
       ...(excludeIds.length > 0 ? { excludeProductIds: excludeIds } : {}),
     }),
   })
-  return res.collections ?? []
+  return { collections: res.collections ?? [], stylistReply: res.stylistReply ?? '' }
 }
 
 export function useChat() {
   const { addChatHistory } = useShop()
+  const { selectedSlug } = usePersona()
   const {
     department,
     selectDepartment: selectSessionDepartment,
@@ -137,9 +141,10 @@ export function useChat() {
       try {
         // Everything already shown in this department is excluded, so the
         // assistant behaves like someone who remembers what they just suggested.
-        const collections = await fetchCollections(
+        const { collections, stylistReply } = await fetchCollections(
           department,
           trimmed,
+          selectedSlug,
           capExclusions(shownProductIds),
         )
 
@@ -159,6 +164,7 @@ export function useChat() {
               : `I couldn't build anything new for "${trimmed}" that you haven't already seen. Try a different occasion, or widen the budget.`,
           timestamp: new Date().toISOString(),
           collections,
+          stylistReply,
         }
         setMessages((prev) => [...prev, assistantMessage])
       } catch (err) {
@@ -173,7 +179,7 @@ export function useChat() {
         setIsThinking(false)
       }
     },
-    [department, addChatHistory, shownProductIds, recordTurn],
+    [department, addChatHistory, shownProductIds, recordTurn, selectedSlug],
   )
 
   const loadMoreCollections = useCallback(
@@ -198,9 +204,10 @@ export function useChat() {
 
         // Ids visible in this message come first so they always survive the
         // cap — they are the repeats the shopper would notice immediately.
-        const more = await fetchCollections(
+        const { collections: more } = await fetchCollections(
           department,
           prompt,
+          selectedSlug,
           capExclusions(visibleIds, shownProductIds),
         )
         const fresh = more.filter((c) => c.items.length > 0 && !shownSigs.has(sig(c)))
@@ -246,7 +253,7 @@ export function useChat() {
         setIsThinking(false)
       }
     },
-    [department, messages, shownProductIds, noteShown],
+    [department, messages, shownProductIds, noteShown, selectedSlug],
   )
 
   const loadBrowseAll = useCallback(
@@ -256,7 +263,10 @@ export function useChat() {
       try {
         const response = await apiFetch<AIRecommendationResponse>('/assistant/chat', {
           method: 'POST',
-          body: JSON.stringify({ prompt: `${department}: ${prompt}` }),
+          body: JSON.stringify({
+            prompt: `${department}: ${prompt}`,
+            ...(selectedSlug ? { personaSlug: selectedSlug } : {}),
+          }),
         })
         noteShown((response.products ?? []).map((p) => p.id))
         setMessages((prev) =>
@@ -282,7 +292,7 @@ export function useChat() {
         setIsThinking(false)
       }
     },
-    [department, noteShown],
+    [department, noteShown, selectedSlug],
   )
 
   const restoreMessages = useCallback(

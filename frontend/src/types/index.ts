@@ -102,6 +102,9 @@ export interface ChatMessage {
   response?: AIRecommendationResponse
   collectionResponse?: CollectionResponse
   collections?: CollectionResponse[]
+  // stylistReply is the persona-voice narration from the backend, shown as the
+  // stylist's spoken line above the collections. Empty when no persona styled it.
+  stylistReply?: string
 }
 
 export interface AIRecommendationResponse {
@@ -174,6 +177,8 @@ export interface CollectionsResponse {
   department: string
   collections: CollectionResponse[]
   meta?: AssistantMeta
+  // stylistReply is the persona-voice narration when a stylist styled the set.
+  stylistReply?: string
 }
 
 // ── Personalization profile ──────────────────────────────────────────────────

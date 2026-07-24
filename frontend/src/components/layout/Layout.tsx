@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
-import { OnboardingGate } from '@/components/onboarding/OnboardingGate'
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -17,8 +16,6 @@ export function Layout({ children }: { children: ReactNode }) {
         {children}
       </motion.main>
       <Footer />
-      {/* First-run onboarding for new shoppers; a no-op for returning ones. */}
-      <OnboardingGate />
     </div>
   )
 }
