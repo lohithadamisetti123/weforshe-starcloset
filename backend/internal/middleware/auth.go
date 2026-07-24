@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/myntra/bharat-ai-backend/internal/config"
+	"github.com/myntra/bharat-ai-backend/internal/models"
 	"github.com/myntra/bharat-ai-backend/internal/services"
 	"github.com/myntra/bharat-ai-backend/internal/utils"
 )
@@ -109,13 +110,41 @@ func RequireRegistered() gin.HandlerFunc {
 
 // RequireAdmin rejects non-admins.
 func RequireAdmin() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if role, _ := c.Get(ctxRole); role != "Admin" {
-			utils.Fail(c, utils.NewForbidden("Administrator access required"))
-			return
-		}
-		c.Next()
+	return RequireRoles(models.RoleAdmin)
+}
+
+// RequireRoles is the reusable role guard. It admits only callers whose
+// authenticated role is in the allowed set, and rejects everyone else — guests
+// and ordinary users alike — with a 403 "Access denied." carrying the standard
+// error envelope. It must run after Auth, which is what places the role in the
+// context; centralising the check here is what keeps every protected route in
+// agreement about who may pass rather than scattering `role == "..."` string
+// comparisons across handlers.
+func RequireRoles(allowed ...models.Role) gin.HandlerFunc {
+	allow := make(map[string]struct{}, len(allowed))
+	for _, r := range allowed {
+		allow[string(r)] = struct{}{}
 	}
+	return func(c *gin.Context) {
+		role, _ := c.Get(ctxRole)
+		if rs, ok := role.(string); ok {
+			if _, permitted := allow[rs]; permitted {
+				c.Next()
+				return
+			}
+		}
+		utils.Fail(c, utils.NewForbidden("Access denied."))
+	}
+}
+
+// Role returns the authenticated caller's role string, or "" when unset.
+func Role(c *gin.Context) string {
+	if v, ok := c.Get(ctxRole); ok {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+	return ""
 }
 
 // bearerToken extracts a token from the Authorization header.

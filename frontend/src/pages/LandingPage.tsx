@@ -1,19 +1,25 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Bot, Zap, ShieldCheck, Users, MessageCircle, Lock, Rocket } from 'lucide-react'
 import { Hero } from '@/components/home/Hero'
 import { Button } from '@/components/ui/Button'
 import { Categories } from '@/components/home/Categories'
 import { Occasions } from '@/components/home/Occasions'
-import { PersonaPicker } from '@/components/starcloset/PersonaPicker'
+import { DepartmentPicker } from '@/components/starcloset/DepartmentPicker'
+import { useAuth } from '@/context/AuthContext'
+import { canManagePersonas } from '@/lib/authz'
 
 const FLOW = [
-  { icon: Users, title: 'Pick', copy: 'Choose a celebrity stylist whose signature style you love.' },
-  { icon: MessageCircle, title: 'Chat', copy: 'Tell them the occasion and budget — get outfits in their voice.' },
-  { icon: Lock, title: 'Unlock', copy: 'Add pieces to your cart to unlock even more star stylists.' },
+  { icon: Users, title: 'Choose Department', copy: 'Pick who you are shopping for — Women, Men or Kids.' },
+  { icon: MessageCircle, title: 'Chat with a Stylist', copy: 'Get outfits in your celebrity stylist’s signature voice.' },
+  { icon: Lock, title: 'Unlock More', copy: 'Add pieces to your cart to unlock new stylists in that department.' },
 ]
 
 export function LandingPage() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const showOnboard = canManagePersonas(user)
+
   return (
     <div className="relative w-full bg-slate-50/50 overflow-hidden">
       {/* GLOBAL BACKGROUND AMBIENT GLOW SYSTEM */}
@@ -51,9 +57,9 @@ export function LandingPage() {
           ))}
         </div>
 
-        {/* Roster */}
-        <div className="mt-12">
-          <PersonaPicker />
+        {/* Department journeys — the first step of StarCloset */}
+        <div className="mt-8">
+          <DepartmentPicker afterSelect={() => navigate('/assistant')} />
         </div>
 
         {/* Actions */}
@@ -63,11 +69,14 @@ export function LandingPage() {
               <Sparkles className="h-4 w-4" /> Stylist Studio
             </Button>
           </Link>
-          <Link to="/partner/onboard">
-            <Button size="lg" variant="outline">
-              <Rocket className="h-4 w-4" /> Onboard a Celebrity
-            </Button>
-          </Link>
+          {/* Partner-only: normal shoppers never see the onboarding entry. */}
+          {showOnboard && (
+            <Link to="/partner/onboard">
+              <Button size="lg" variant="outline">
+                <Rocket className="h-4 w-4" /> Onboard a Celebrity
+              </Button>
+            </Link>
+          )}
         </div>
       </section>
 

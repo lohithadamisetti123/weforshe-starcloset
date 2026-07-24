@@ -73,6 +73,18 @@ func (s *PersonaService) Update(slug string, payload dto.OnboardPersonaPayload) 
 	return dto.NewPersonaDetail(updated), nil
 }
 
+// Delete removes a persona entirely.
+func (s *PersonaService) Delete(slug string) error {
+	if err := s.store.Delete(slug); err != nil {
+		if errors.Is(err, personas.ErrNotFound) {
+			return utils.NewNotFound("Stylist")
+		}
+		return utils.NewInternal(err)
+	}
+	s.log.Info("persona deleted", zap.String("slug", slug))
+	return nil
+}
+
 // Publish flips a persona to published so shoppers can see it.
 func (s *PersonaService) Publish(slug string) (dto.PersonaDetail, error) {
 	published, err := s.store.Publish(slug)

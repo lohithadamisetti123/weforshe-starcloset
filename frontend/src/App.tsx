@@ -3,8 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ShopProvider } from '@/context/ShopContext'
 import { AuthProvider } from '@/context/AuthContext'
 import { SessionProvider } from '@/context/SessionContext'
-import { PersonaProvider } from '@/context/PersonaContext'
+import { StarClosetProvider } from '@/context/StarClosetContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { RequireRole } from '@/components/auth/RequireRole'
 import { Layout } from '@/components/layout/Layout'
 import { LandingPage } from '@/pages/LandingPage'
 import { AssistantPage } from '@/pages/AssistantPage'
@@ -26,16 +27,26 @@ function App() {
       <AuthProvider>
       <SessionProvider>
       <ShopProvider>
-      <PersonaProvider>
+      <StarClosetProvider>
       <BrowserRouter>
         <Layout>
           <Routes>
-            {/* Public: the landing page, the auth screens, and the partner
-                onboarding portal. Everything else requires a signed-in account. */}
+            {/* Public: the landing page and the auth screens. */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/partner/onboard" element={<PersonaOnboardPage />} />
+
+            {/* Partner portal: PARTNER/ADMIN only. RequireRole redirects any
+                other visitor (guest, shopper, signed-out) to Home before the
+                onboarding UI can mount. */}
+            <Route
+              path="/partner/onboard"
+              element={
+                <RequireRole>
+                  <PersonaOnboardPage />
+                </RequireRole>
+              }
+            />
 
             <Route
               path="/assistant"
@@ -89,7 +100,7 @@ function App() {
           </Routes>
         </Layout>
       </BrowserRouter>
-      </PersonaProvider>
+      </StarClosetProvider>
       </ShopProvider>
       </SessionProvider>
       </AuthProvider>

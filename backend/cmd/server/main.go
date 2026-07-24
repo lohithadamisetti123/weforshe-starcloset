@@ -123,6 +123,7 @@ func run() error {
 	collectionCartRepo := repositories.NewCollectionCartRepository(db, log)
 	userProfileRepo := repositories.NewUserProfileRepository(db, log)
 	pastOrderRepo := repositories.NewPastOrderRepository(db, log)
+	starProgressRepo := repositories.NewStarProgressRepository(db, log)
 
 	// --- Recommendation engine ------------------------------------------------
 	// productRepo satisfies recommendation.CandidateSource directly — no
@@ -189,6 +190,7 @@ func run() error {
 	assistantService := services.NewAssistantService(
 		ruleExtractor, geminiExtractor, engine, recommendationRepo, historyRepo, cache, personalizer, personaStore, log)
 	personaService := services.NewPersonaService(personaStore, log)
+	starClosetService := services.NewStarClosetService(personaStore, starProgressRepo, log)
 	profileService := services.NewProfileService(userProfileRepo, pastOrderRepo, productRepo, log)
 	historyService := services.NewHistoryService(historyRepo, cache, log)
 	recommendationService := services.NewRecommendationService(recommendationRepo, log)
@@ -210,6 +212,7 @@ func run() error {
 		Profile:        handlers.NewProfileHandler(profileService, val),
 		Cart:           handlers.NewCartHandler(cartService, val),
 		Persona:        handlers.NewPersonaHandler(personaService, val),
+		StarCloset:     handlers.NewStarClosetHandler(starClosetService, val),
 	}
 
 	router := buildRouter(cfg, log)

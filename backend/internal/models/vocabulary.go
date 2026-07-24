@@ -289,11 +289,22 @@ var AllApparelCategories = []CategoryName{
 type Role string
 
 const (
-	RoleUser  Role = "User"
-	RoleAdmin Role = "Admin"
+	RoleUser Role = "User"
+	// RolePartner is a stylist partner: they may create, edit, publish and
+	// delete personas through the partner portal, but have no other elevated
+	// access. Introduced for StarCloset RBAC.
+	RolePartner Role = "Partner"
+	RoleAdmin   Role = "Admin"
 )
 
-var AllRoles = []Role{RoleUser, RoleAdmin}
+var AllRoles = []Role{RoleUser, RolePartner, RoleAdmin}
+
+// CanManagePersonas reports whether a role may use the partner persona portal.
+// Centralising the rule here keeps the backend guard and any future check in
+// agreement about who "partner access" means.
+func CanManagePersonas(r Role) bool {
+	return r == RolePartner || r == RoleAdmin
+}
 
 // ---------------------------------------------------------------------------
 // HistoryStatus

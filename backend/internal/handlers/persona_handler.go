@@ -120,6 +120,23 @@ func (h *PersonaHandler) Update(c *gin.Context) {
 	utils.OK(c, detail)
 }
 
+// Delete handles DELETE /api/v1/partner/personas/:slug.
+//
+//	@Summary	Delete a persona
+//	@Tags		partner
+//	@Produce	json
+//	@Param		slug	path	string	true	"Persona slug"
+//	@Success	204
+//	@Failure	404	{object}	utils.ErrorResponse
+//	@Router		/partner/personas/{slug} [delete]
+func (h *PersonaHandler) Delete(c *gin.Context) {
+	if err := h.personas.Delete(c.Param("slug")); err != nil {
+		utils.Fail(c, err)
+		return
+	}
+	utils.NoContent(c)
+}
+
 // Publish handles POST /api/v1/partner/personas/:slug/publish.
 //
 //	@Summary	Publish a persona so shoppers can choose it

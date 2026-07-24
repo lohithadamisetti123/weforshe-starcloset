@@ -16,6 +16,9 @@ interface CollectionsViewProps {
   isThinking: boolean
   onLoadMore: (messageId: string, prompt: string) => void
   onBrowseAll: (messageId: string, prompt: string) => void
+  // onCartAdd fires on each cart addition (a slot product or a whole
+  // collection), so the studio can advance the department's unlock journey.
+  onCartAdd?: () => void
 }
 
 export function CollectionsView({
@@ -26,6 +29,7 @@ export function CollectionsView({
   isThinking,
   onLoadMore,
   onBrowseAll,
+  onCartAdd,
 }: CollectionsViewProps) {
   const { saveCollection, isCollectionSaved, addCollectionToCart, isCollectionInCart } = useShop()
   const [expanded, setExpanded] = useState<Set<number>>(new Set([0]))
@@ -53,6 +57,7 @@ export function CollectionsView({
   const handleAddToCart = (collection: CollectionResponse) => {
     const added = addCollectionToCart(collection)
     showToast(added ? 'Collection added to cart!' : 'Already in cart.')
+    if (added) onCartAdd?.()
   }
 
   const handleBrowseAll = () => {
@@ -104,7 +109,7 @@ export function CollectionsView({
               {/* Expanded body */}
               {expanded.has(i) && (
                 <div className="border-t border-line px-5 pb-5 pt-4">
-                  <CollectionCard collection={collection} hideHeader />
+                  <CollectionCard collection={collection} hideHeader onCartAdd={onCartAdd} />
 
                   {/* ── Per-collection action buttons ─────────────────── */}
                   <div className="mt-4 flex flex-wrap gap-2">

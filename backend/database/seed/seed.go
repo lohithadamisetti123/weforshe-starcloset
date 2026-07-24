@@ -223,6 +223,7 @@ var demoUsers = []struct {
 	Role     models.Role
 }{
 	{"Asha Menon", "asha@myntra.dev", "bharat-ai-demo", models.RoleUser},
+	{"Priya Partner", "partner@myntra.dev", "bharat-ai-partner", models.RolePartner},
 	{"Admin", "admin@myntra.dev", "bharat-ai-admin", models.RoleAdmin},
 }
 

@@ -26,6 +26,8 @@ type Store interface {
 	Update(slug string, p Persona) (Persona, error)
 	// Publish flips a persona's status to published.
 	Publish(slug string) (Persona, error)
+	// Delete removes a persona by slug.
+	Delete(slug string) error
 }
 
 // ErrSlugTaken is returned when creating a persona whose slug already exists.
@@ -243,4 +245,23 @@ func (s *fileStore) Publish(slug string) (Persona, error) {
 	s.byID[slug] = p
 	_ = s.persist()
 	return p, nil
+}
+
+func (s *fileStore) Delete(slug string) error {
+	slug = normalizeSlug(slug)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, ok := s.byID[slug]; !ok {
+		return ErrNotFound
+	}
+	delete(s.byID, slug)
+	for i, id := range s.order {
+		if id == slug {
+			s.order = append(s.order[:i], s.order[i+1:]...)
+			break
+		}
+	}
+	_ = s.persist()
+	return nil
 }

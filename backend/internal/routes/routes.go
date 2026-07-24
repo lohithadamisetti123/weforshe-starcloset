@@ -11,6 +11,7 @@ import (
 	"github.com/myntra/bharat-ai-backend/internal/config"
 	"github.com/myntra/bharat-ai-backend/internal/handlers"
 	"github.com/myntra/bharat-ai-backend/internal/middleware"
+	"github.com/myntra/bharat-ai-backend/internal/models"
 	"github.com/myntra/bharat-ai-backend/internal/services"
 	"github.com/myntra/bharat-ai-backend/internal/utils"
 )
@@ -30,6 +31,7 @@ type Handlers struct {
 	Profile        *handlers.ProfileHandler
 	Cart           *handlers.CartHandler
 	Persona        *handlers.PersonaHandler
+	StarCloset     *handlers.StarClosetHandler
 }
 
 // Register mounts every route.
@@ -84,17 +86,27 @@ func Register(
 	// before deciding to sign in, exactly like browsing the catalogue.
 	api.GET("/assistant/personas", h.Persona.ListPublished)
 
-	// The partner onboarding portal. Partner authentication is out of scope for
-	// this MVP, so these are unauthenticated — a real deployment would gate the
-	// write routes behind a partner identity. Reads and writes both live here so
-	// the wizard can create, edit, preview and publish in one place.
+	// The V2 department rosters (Women / Men / Kids and their stylists) are
+	// public config, like the catalogue departments — a visitor sees the whole
+	// journey before signing in. Per-department unlock *progress*, being
+	// per-shopper, lives under the authed group below.
+	api.GET("/starcloset/departments", h.StarCloset.Departments)
+
+	// The partner onboarding portal. Every route here is gated by RBAC: the
+	// group first resolves an identity (Auth) and then admits only PARTNER and
+	// ADMIN roles (RequireRoles). A guest or an ordinary shopper is rejected with
+	// a 403 "Access denied." — they can view and pick stylists via the public
+	// roster above, but never create, edit, publish or delete one.
 	partner := api.Group("/partner/personas")
+	partner.Use(middleware.Auth(authService, tokens, *cfg, log))
+	partner.Use(middleware.RequireRoles(models.RolePartner, models.RoleAdmin))
 	{
 		partner.GET("/schema", h.Persona.Schema)
 		partner.GET("", h.Persona.ListAll)
 		partner.GET("/:slug", h.Persona.Get)
 		partner.POST("", h.Persona.Create)
 		partner.PUT("/:slug", h.Persona.Update)
+		partner.DELETE("/:slug", h.Persona.Delete)
 		partner.POST("/:slug/publish", h.Persona.Publish)
 	}
 
@@ -179,5 +191,13 @@ func Register(
 		}
 
 		authed.GET("/dashboard/stats", h.Dashboard.Stats)
+
+		// StarCloset V2 per-department unlock progress. Identity-scoped: each
+		// shopper advances and reads only their own three independent journeys.
+		starcloset := authed.Group("/starcloset")
+		{
+			starcloset.GET("/progress", h.StarCloset.GetProgress)
+			starcloset.POST("/progress", h.StarCloset.Increment)
+		}
 	}
 }

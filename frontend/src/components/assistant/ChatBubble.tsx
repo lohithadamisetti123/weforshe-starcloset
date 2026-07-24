@@ -10,9 +10,10 @@ interface ChatBubbleProps {
   isThinking: boolean
   onLoadMore: (messageId: string, prompt: string) => void
   onBrowseAll: (messageId: string, prompt: string) => void
+  onCartAdd?: () => void
 }
 
-export function ChatBubble({ message, isThinking, onLoadMore, onBrowseAll }: ChatBubbleProps) {
+export function ChatBubble({ message, isThinking, onLoadMore, onBrowseAll, onCartAdd }: ChatBubbleProps) {
   const isUser = message.role === 'user'
   const time = new Date(message.timestamp).toLocaleTimeString('en-IN', {
     hour: '2-digit',
@@ -50,6 +51,7 @@ export function ChatBubble({ message, isThinking, onLoadMore, onBrowseAll }: Cha
             isThinking={isThinking}
             onLoadMore={onLoadMore}
             onBrowseAll={onBrowseAll}
+            onCartAdd={onCartAdd}
           />
         ) : message.response ? (
           <ResponseCard response={message.response} />

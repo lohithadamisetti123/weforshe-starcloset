@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useShop } from '@/context/AppContext'
 import { useSession } from '@/context/SessionContext'
-import { usePersona } from '@/context/PersonaContext'
+import { useStarCloset } from '@/context/StarClosetContext'
 import { capExclusions } from '@/context/sessionState'
 import { apiFetch } from '@/lib/api'
 import type {
@@ -99,7 +99,7 @@ async function fetchCollections(
 
 export function useChat() {
   const { addChatHistory } = useShop()
-  const { selectedSlug } = usePersona()
+  const { selectedSlug } = useStarCloset()
   const {
     department,
     selectDepartment: selectSessionDepartment,

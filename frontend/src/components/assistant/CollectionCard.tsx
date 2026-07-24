@@ -6,7 +6,7 @@ import { formatINR } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { useShop } from '@/context/ShopContext'
 
-function SlotCard({ product, slot }: { product: Product; slot: string }) {
+function SlotCard({ product, slot, onCartAdd }: { product: Product; slot: string; onCartAdd?: () => void }) {
   const { isFavorite, toggleFavorite, isInCart, addToCart, removeFromCart } = useShop()
   const saved = isFavorite(product.id)
   const inCart = isInCart(product.id)
@@ -20,6 +20,8 @@ function SlotCard({ product, slot }: { product: Product; slot: string }) {
       addToCart(product)
       setToasted(true)
       setTimeout(() => setToasted(false), 1500)
+      // Only an add advances the department journey — never a remove.
+      onCartAdd?.()
     }
   }
 
@@ -105,9 +107,12 @@ interface CollectionCardProps {
   // When true, the title/total header is omitted — used inside CollectionsView
   // which renders its own accordion header row instead.
   hideHeader?: boolean
+  // onCartAdd fires when an individual slot is added to the cart. Wired only in
+  // the studio (to advance the department journey); other usages leave it unset.
+  onCartAdd?: () => void
 }
 
-export function CollectionCard({ collection, hideHeader = false }: CollectionCardProps) {
+export function CollectionCard({ collection, hideHeader = false, onCartAdd }: CollectionCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -140,7 +145,7 @@ export function CollectionCard({ collection, hideHeader = false }: CollectionCar
       {/* Horizontal scroll rail */}
       <div className="no-scrollbar flex gap-3 overflow-x-auto pb-1">
         {collection.items.map((item) => (
-          <SlotCard key={item.slot} product={item.product} slot={item.slot} />
+          <SlotCard key={item.slot} product={item.product} slot={item.slot} onCartAdd={onCartAdd} />
         ))}
       </div>
 
