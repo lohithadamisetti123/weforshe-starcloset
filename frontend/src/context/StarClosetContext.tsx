@@ -144,12 +144,16 @@ export function StarClosetProvider({ children }: { children: ReactNode }) {
 
   const selectedSlug = selectedDepartment ? (picks[selectedDepartment] ?? null) : null
 
-  const selectedPersona = useMemo(
-    () => currentDept?.stylists.find((s) => s.slug === selectedSlug) ?? null,
-    [currentDept, selectedSlug],
-  )
-
   const unlockScore = selectedDepartment ? (progress[selectedDepartment] ?? 0) : 0
+
+  const selectedPersona = useMemo(() => {
+    const p = currentDept?.stylists.find((s) => s.slug === selectedSlug) ?? null
+    // A persisted pick is honoured only while it remains unlocked at the current
+    // progress. A stale or now-locked pick falls back to the progression map,
+    // so a locked stylist can never appear as the active one.
+    if (!p || unlockScore < p.unlockAtItems) return null
+    return p
+  }, [currentDept, selectedSlug, unlockScore])
 
   const isUnlocked = useCallback(
     (stylist: StarStylist) => unlockScore >= stylist.unlockAtItems,
