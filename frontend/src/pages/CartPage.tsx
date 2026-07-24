@@ -30,7 +30,7 @@ function CheckoutSuccess({ onReset }: { onReset: () => void }) {
         Your curated collection is ready.
       </h2>
       <p className="mt-3 max-w-sm text-sm text-ink-500">
-        Bharat AI has curated the perfect picks for you. Head to Myntra to complete your order.
+        Your StarCloset stylist has curated the perfect picks for you. Complete your order to make them yours.
       </p>
       <button
         onClick={onReset}

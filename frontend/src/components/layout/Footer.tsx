@@ -55,11 +55,11 @@ export function Footer() {
                 <Sparkles className="h-4 w-4 text-white" />
               </span>
               <span className="font-display text-base font-bold text-ink-900">
-                Myntra <span className="text-brand-500">Bharat AI</span>
+                Star<span className="text-brand-500">Closet</span>
               </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-500">
-              Your personal AI fashion stylist — built for Myntra WeForShe HackerRamp 2026.
+              Dress like the icons you love — celebrity AI stylists, built for WeForShe HackerRamp 2026.
             </p>
           </div>
           {visibleColumns.map((col) => (
@@ -78,7 +78,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-line pt-6 text-xs text-ink-500 sm:flex-row">
-          <p>© 2026 Myntra Bharat AI. Built for WeForShe HackerRamp — a hackathon concept, not affiliated with production Myntra.</p>
+          <p>© 2026 StarCloset. Built for WeForShe HackerRamp — a hackathon concept. Celebrity personas are style-inspired tributes, not endorsements or affiliations.</p>
           <p>Made with React, TypeScript &amp; Framer Motion</p>
         </div>
       </div>

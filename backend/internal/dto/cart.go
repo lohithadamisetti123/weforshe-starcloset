@@ -15,7 +15,11 @@ import (
 // cannot ask to write into someone else's cart because there is nowhere to say
 // whose cart it is.
 type AddCartItemRequest struct {
-	ProductID string `json:"productId" binding:"required" validate:"required,uuid4"`
+	// Any RFC-4122 UUID version is accepted: the seed catalogue mints product IDs
+	// deterministically (UUIDv5 from the slug) as well as randomly (UUIDv4), so a
+	// uuid4-only rule would 422 over half the catalogue — including every product
+	// the collection builder surfaces.
+	ProductID string `json:"productId" binding:"required" validate:"required,uuid"`
 }
 
 // CartItem is the wire shape of one cart line. The product is embedded so the

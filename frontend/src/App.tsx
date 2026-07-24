@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ShopProvider } from '@/context/ShopContext'
 import { AuthProvider } from '@/context/AuthContext'
 import { SessionProvider } from '@/context/SessionContext'
+import { PersonaProvider } from '@/context/PersonaContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { Layout } from '@/components/layout/Layout'
 import { LandingPage } from '@/pages/LandingPage'
@@ -14,6 +15,7 @@ import { SavedPage } from '@/pages/SavedPage'
 import { CartPage } from '@/pages/CartPage'
 import { SignInPage } from '@/pages/SignInPage'
 import { SignUpPage } from '@/pages/SignUpPage'
+import { PersonaOnboardPage } from '@/pages/PersonaOnboardPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 const queryClient = new QueryClient()
@@ -24,14 +26,16 @@ function App() {
       <AuthProvider>
       <SessionProvider>
       <ShopProvider>
+      <PersonaProvider>
       <BrowserRouter>
         <Layout>
           <Routes>
-            {/* Public: the landing page and the two auth screens. Everything
-                else requires a signed-in account. */}
+            {/* Public: the landing page, the auth screens, and the partner
+                onboarding portal. Everything else requires a signed-in account. */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/partner/onboard" element={<PersonaOnboardPage />} />
 
             <Route
               path="/assistant"
@@ -85,6 +89,7 @@ function App() {
           </Routes>
         </Layout>
       </BrowserRouter>
+      </PersonaProvider>
       </ShopProvider>
       </SessionProvider>
       </AuthProvider>

@@ -1,10 +1,17 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles, Bot, Zap, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Sparkles, Bot, Zap, ShieldCheck, Users, MessageCircle, Lock, Rocket } from 'lucide-react'
 import { Hero } from '@/components/home/Hero'
 import { Button } from '@/components/ui/Button'
-import { Categories } from '@/components/home/Categories' 
+import { Categories } from '@/components/home/Categories'
 import { Occasions } from '@/components/home/Occasions'
+import { PersonaPicker } from '@/components/starcloset/PersonaPicker'
+
+const FLOW = [
+  { icon: Users, title: 'Pick', copy: 'Choose a celebrity stylist whose signature style you love.' },
+  { icon: MessageCircle, title: 'Chat', copy: 'Tell them the occasion and budget — get outfits in their voice.' },
+  { icon: Lock, title: 'Unlock', copy: 'Add pieces to your cart to unlock even more star stylists.' },
+]
 
 export function LandingPage() {
   return (
@@ -14,6 +21,55 @@ export function LandingPage() {
 
       {/* HERO SECTION */}
       <Hero />
+
+      {/* ── STARCLOSET: CELEBRITY STYLIST ROSTER ─────────────────────────── */}
+      <section id="stylists" className="relative mx-auto max-w-7xl px-5 py-20 lg:px-8">
+        <div className="text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-600">
+            <Sparkles className="h-3.5 w-3.5" /> StarCloset · Celebrity Stylists
+          </span>
+          <h2 className="mx-auto mt-4 max-w-2xl font-display text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">
+            Dress like the icons you love
+          </h2>
+          <p className="mx-auto mt-3 max-w-lg text-base text-ink-500">
+            Pick a celebrity stylist, chat for outfits in their signature style, and unlock more as you shop.
+          </p>
+        </div>
+
+        {/* Pick → Chat → Unlock */}
+        <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+          {FLOW.map((s, i) => (
+            <div key={s.title} className="relative rounded-2xl border border-line bg-white p-5 text-center">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                <s.icon className="h-5 w-5" />
+              </div>
+              <p className="mt-3 font-display text-sm font-bold text-ink-900">
+                {i + 1}. {s.title}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-ink-500">{s.copy}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Roster */}
+        <div className="mt-12">
+          <PersonaPicker />
+        </div>
+
+        {/* Actions */}
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link to="/assistant">
+            <Button size="lg">
+              <Sparkles className="h-4 w-4" /> Stylist Studio
+            </Button>
+          </Link>
+          <Link to="/partner/onboard">
+            <Button size="lg" variant="outline">
+              <Rocket className="h-4 w-4" /> Onboard a Celebrity
+            </Button>
+          </Link>
+        </div>
+      </section>
 
       {/* CATEGORIES SECTION */}
       <Categories />
@@ -89,7 +145,7 @@ export function LandingPage() {
                 >
                   <Button size="lg" variant="primary" className="relative group/btn overflow-hidden bg-gradient-to-r from-rose-500 via-pink-600 to-rose-500 text-white font-extrabold px-8 py-6 rounded-2xl shadow-[0_15px_30px_-8px_rgba(244,63,94,0.5)] border border-rose-400/40 text-sm uppercase tracking-wider flex items-center gap-2.5">
                     <Bot className="h-5 w-5 text-rose-200" />
-                    <span>Try AI Assistant</span>
+                    <span>Enter the Stylist Studio</span>
                     <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1.5 transition-transform" />
                   </Button>
                 </motion.div>
@@ -105,7 +161,7 @@ export function LandingPage() {
               <span className="hidden sm:inline text-slate-700">•</span>
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Myntra Catalog Sync</span>
+                <span>Rule-based &amp; explainable</span>
               </div>
             </div>
 

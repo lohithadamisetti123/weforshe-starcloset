@@ -22,6 +22,12 @@ type CollectionRequest struct {
 	// Optional and defaulted empty, so the singular endpoint and first-page
 	// requests are unaffected.
 	ExcludeProductIds []string `json:"excludeProductIds,omitempty" validate:"omitempty,max=200"`
+
+	// PersonaSlug names the StarCloset stylist styling this request. Optional:
+	// an empty slug (or an unknown one) runs the engine exactly as before, with
+	// no persona bias and no stylist reply. When set, the persona's Style DNA is
+	// merged into the ranking context and its voice produces the stylistReply.
+	PersonaSlug string `json:"personaSlug,omitempty" validate:"omitempty,max=80"`
 }
 
 // DepartmentOption is one first-step choice, with whether it currently has
@@ -62,6 +68,10 @@ type CollectionResponse struct {
 	Explanation  []string         `json:"explanation"`
 	Department   string           `json:"department"`
 	Meta         *AssistantMeta   `json:"meta,omitempty"`
+
+	// StylistReply is the persona-voice narration for this collection, when a
+	// stylist persona styled the request. Empty when no persona was used.
+	StylistReply string `json:"stylistReply,omitempty"`
 }
 
 // CollectionsResponse carries the full set of themed collections built for one
@@ -79,6 +89,11 @@ type CollectionsResponse struct {
 	Department  string               `json:"department"`
 	Collections []CollectionResponse `json:"collections"`
 	Meta        *AssistantMeta       `json:"meta,omitempty"`
+
+	// StylistReply is the persona-voice narration for this set of collections,
+	// generated deterministically from the chosen stylist's templates. Empty
+	// when no persona styled the request.
+	StylistReply string `json:"stylistReply,omitempty"`
 }
 
 // NewCollectionsResponse builds the plural wire response from the engine's

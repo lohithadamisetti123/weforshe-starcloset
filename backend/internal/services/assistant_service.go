@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/myntra/bharat-ai-backend/internal/ai"
+	"github.com/myntra/bharat-ai-backend/internal/assistant"
 	"github.com/myntra/bharat-ai-backend/internal/dto"
 	"github.com/myntra/bharat-ai-backend/internal/models"
+	"github.com/myntra/bharat-ai-backend/internal/personas"
 	"github.com/myntra/bharat-ai-backend/internal/recommendation"
 	"github.com/myntra/bharat-ai-backend/internal/repositories"
 )
@@ -56,6 +59,7 @@ type AssistantService struct {
 	history      repositories.HistoryRepository
 	cache        *repositories.Cache
 	personalizer Personalizer
+	personaStore personas.Store
 	log          *zap.Logger
 }
 
@@ -72,6 +76,7 @@ func NewAssistantService(
 	history repositories.HistoryRepository,
 	cache *repositories.Cache,
 	personalizer Personalizer,
+	personaStore personas.Store,
 	log *zap.Logger,
 ) *AssistantService {
 	return &AssistantService{
@@ -82,8 +87,23 @@ func NewAssistantService(
 		history:      history,
 		cache:        cache,
 		personalizer: personalizer,
+		personaStore: personaStore,
 		log:          log,
 	}
+}
+
+// resolvePersona looks up the requested stylist. It returns nil for an empty
+// slug, an unknown slug, or when no persona store is wired — every one of which
+// makes the request run exactly as it did before StarCloset personas existed.
+func (s *AssistantService) resolvePersona(slug string) *personas.Persona {
+	if s.personaStore == nil || strings.TrimSpace(slug) == "" {
+		return nil
+	}
+	p, ok := s.personaStore.Get(slug)
+	if !ok {
+		return nil
+	}
+	return &p
 }
 
 // attachPersonalization best-effort loads the shopper's personalization context
@@ -119,6 +139,11 @@ func (s *AssistantService) Chat(ctx context.Context, userID uuid.UUID, req dto.C
 	intent := s.understand(ctx, req.Prompt)
 	personalized := s.attachPersonalization(ctx, userID, intent)
 
+	// A stylist persona, when chosen, folds its Style DNA into the intent before
+	// the engine runs. nil persona → the engine behaves exactly as before.
+	persona := s.resolvePersona(req.PersonaSlug)
+	applyPersona(intent, persona)
+
 	result, err := s.engine.Recommend(ctx, intent)
 	if err != nil {
 		return nil, err
@@ -143,6 +168,17 @@ func (s *AssistantService) Chat(ctx context.Context, userID uuid.UUID, req dto.C
 
 	resp := dto.NewAIRecommendationResponse(result, recID, latency)
 	resp.Meta.Personalized = personalized
+
+	// When a stylist styled this chat, stamp the persona on the meta and let the
+	// deterministic persona voice speak the summary in the stylist's register.
+	if persona != nil {
+		resp.Meta.PersonaSlug = persona.Slug
+		resp.Meta.PersonaName = persona.DisplayName
+		count, highlight := productsVoiceStats(result.Products)
+		if reply := assistant.Reply(persona, personaVoiceInput(req.Prompt, "", intent, count, highlight, nil)); reply != "" {
+			resp.Summary = reply
+		}
+	}
 
 	s.log.Info("assistant answered",
 		zap.String("userId", userID.String()),
@@ -300,6 +336,8 @@ func (s *AssistantService) Collection(ctx context.Context, userID uuid.UUID, req
 
 	intent := s.understand(ctx, req.Prompt)
 	personalized := s.attachPersonalization(ctx, userID, intent)
+	persona := s.resolvePersona(req.PersonaSlug)
+	applyPersona(intent, persona)
 
 	// BuildThemeCollections generates up to 3 internally diverse variants, each
 	// exploring a different styling corner (Traditional / Contemporary / Luxury,
@@ -339,6 +377,10 @@ func (s *AssistantService) Collection(ctx context.Context, userID uuid.UUID, req
 		LatencyMS:    latency,
 		Personalized: personalized,
 	}
+	if persona != nil {
+		meta.PersonaSlug = persona.Slug
+		meta.PersonaName = persona.DisplayName
+	}
 
 	s.log.Info("collection built",
 		zap.String("department", req.Department),
@@ -350,6 +392,11 @@ func (s *AssistantService) Collection(ctx context.Context, userID uuid.UUID, req
 		zap.Int("latencyMs", latency))
 
 	resp := dto.NewCollectionResponse(req.Department, best, meta)
+	if persona != nil {
+		count, highlight, pieces := collectionsVoiceStats([]*recommendation.Collection{best})
+		resp.StylistReply = assistant.Reply(persona,
+			personaVoiceInput(req.Prompt, req.Department, intent, count, highlight, pieces))
+	}
 	return &resp, nil
 }
 
@@ -373,6 +420,8 @@ func (s *AssistantService) Collections(ctx context.Context, userID uuid.UUID, re
 
 	intent := s.understand(ctx, req.Prompt)
 	personalized := s.attachPersonalization(ctx, userID, intent)
+	persona := s.resolvePersona(req.PersonaSlug)
+	applyPersona(intent, persona)
 
 	// Caller-supplied exclusions (products already shown) seed the intent so
 	// "More Collections" returns a fresh set. BuildThemeCollections carries
@@ -399,14 +448,26 @@ func (s *AssistantService) Collections(ctx context.Context, userID uuid.UUID, re
 		LatencyMS:    latency,
 		Personalized: personalized,
 	}
+	if persona != nil {
+		meta.PersonaSlug = persona.Slug
+		meta.PersonaName = persona.DisplayName
+	}
 
 	s.log.Info("collections built",
 		zap.String("department", req.Department),
 		zap.String("source", string(intent.Source)),
 		zap.Int("collections", len(collections)),
+		zap.String("persona", req.PersonaSlug),
 		zap.Int("latencyMs", latency))
 
 	resp := dto.NewCollectionsResponse(req.Department, collections, meta)
+	// The stylist voice narrates the whole set, deterministically, from the
+	// persona's own templates — never an external model.
+	if persona != nil {
+		count, highlight, pieces := collectionsVoiceStats(collections)
+		resp.StylistReply = assistant.Reply(persona,
+			personaVoiceInput(req.Prompt, req.Department, intent, count, highlight, pieces))
+	}
 	return &resp, nil
 }
 

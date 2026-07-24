@@ -6,7 +6,7 @@ import (
 
 // AddFavoriteRequest is the body of POST /api/v1/favorites.
 type AddFavoriteRequest struct {
-	ProductID string `json:"productId" binding:"required" validate:"required,uuid4"`
+	ProductID string `json:"productId" binding:"required" validate:"required,uuid"`
 }
 
 // Favorite is the wire shape of a saved product.

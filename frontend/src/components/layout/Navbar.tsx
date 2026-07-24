@@ -145,7 +145,7 @@ export function Navbar() {
             <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
           </span>
           <span className="font-display text-[17px] font-bold tracking-tight text-ink-900">
-            Myntra <span className="text-brand-500">Bharat AI</span>
+            Star<span className="text-brand-500">Closet</span>
           </span>
         </Link>
 
@@ -173,7 +173,7 @@ export function Navbar() {
           <Link to="/assistant">
             <Button size="md">
               <Sparkles className="h-4 w-4" />
-              Try AI
+              Stylist Studio
             </Button>
           </Link>
         </div>
@@ -216,7 +216,7 @@ export function Navbar() {
               <Link to="/assistant" onClick={() => setOpen(false)} className="mt-2">
                 <Button className="w-full">
                   <Sparkles className="h-4 w-4" />
-                  Try AI
+                  Stylist Studio
                 </Button>
               </Link>
               <MobileAuth onNavigate={() => setOpen(false)} />

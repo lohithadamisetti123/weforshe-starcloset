@@ -238,10 +238,10 @@ function AIPortalTrigger({ index, isInView }: { index: number, isInView: boolean
             animate={{ y: isHovered ? -2 : 0 }}
             className="inline-flex items-center gap-1.5 text-[11px] font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-rose-600 to-amber-800 uppercase"
           >
-            <Bot size={13} className="text-amber-700" /> Bharat AI Stylist
+            <Bot size={13} className="text-amber-700" /> StarCloset Stylists
           </motion.div>
           <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 group-hover:text-amber-800 transition-colors font-sans">
-            Ask AI Assistant
+            Meet Your Stylists
           </h3>
           <p className="text-xs text-stone-500 max-w-[190px] font-medium leading-relaxed mx-auto">
             Interactive lookbook generator tuned to your style

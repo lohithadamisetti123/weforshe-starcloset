@@ -13,6 +13,10 @@ type ChatRequest struct {
 	// pointer so that omitting it means "yes" (the frontend sends no such
 	// field) while an explicit false can still switch it off for previews.
 	Persist *bool `json:"persist,omitempty"`
+
+	// PersonaSlug names the StarCloset stylist styling this chat. Optional: an
+	// empty or unknown slug runs the assistant exactly as before.
+	PersonaSlug string `json:"personaSlug,omitempty" validate:"omitempty,max=80"`
 }
 
 // ShouldPersist reports whether the turn should be recorded.
@@ -88,6 +92,11 @@ type AssistantMeta struct {
 	// history that produced boosts. The client uses it to show a "Personalized
 	// for you" cue; it never affects ranking.
 	Personalized bool `json:"personalized"`
+
+	// PersonaSlug and PersonaName identify the StarCloset stylist that styled
+	// this run, when one did. Empty when no persona was applied.
+	PersonaSlug string `json:"personaSlug,omitempty"`
+	PersonaName string `json:"personaName,omitempty"`
 }
 
 // IntentView is the client-facing projection of a recommendation.Intent.

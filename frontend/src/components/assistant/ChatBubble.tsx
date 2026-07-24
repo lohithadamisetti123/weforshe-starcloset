@@ -33,6 +33,13 @@ export function ChatBubble({ message, isThinking, onLoadMore, onBrowseAll }: Cha
     >
       <Avatar variant={isUser ? 'user' : 'ai'} />
       <div className={cn('flex max-w-[92%] flex-col gap-2', isUser && 'items-end')}>
+        {/* The stylist's spoken line, in the persona's voice, above their picks. */}
+        {!isUser && message.stylistReply && (
+          <div className="rounded-xl rounded-tl-sm border border-brand-100 bg-gradient-to-br from-brand-50/70 to-white px-4 py-3 text-sm font-medium leading-relaxed text-ink-800 shadow-sm">
+            {message.stylistReply}
+          </div>
+        )}
+
         {/* Multiple named collections */}
         {message.collections && message.collections.length > 0 ? (
           <CollectionsView

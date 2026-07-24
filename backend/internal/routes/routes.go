@@ -29,6 +29,7 @@ type Handlers struct {
 	Dashboard      *handlers.DashboardHandler
 	Profile        *handlers.ProfileHandler
 	Cart           *handlers.CartHandler
+	Persona        *handlers.PersonaHandler
 }
 
 // Register mounts every route.
@@ -77,6 +78,25 @@ func Register(
 	api.GET("/categories", h.Products.Categories)
 	api.GET("/brands", h.Products.Brands)
 	api.GET("/assistant/departments", h.Assistant.Departments)
+
+	// --- StarCloset stylist personas -----------------------------------------
+	// The shopper roster is public: a visitor should see and pick a stylist
+	// before deciding to sign in, exactly like browsing the catalogue.
+	api.GET("/assistant/personas", h.Persona.ListPublished)
+
+	// The partner onboarding portal. Partner authentication is out of scope for
+	// this MVP, so these are unauthenticated — a real deployment would gate the
+	// write routes behind a partner identity. Reads and writes both live here so
+	// the wizard can create, edit, preview and publish in one place.
+	partner := api.Group("/partner/personas")
+	{
+		partner.GET("/schema", h.Persona.Schema)
+		partner.GET("", h.Persona.ListAll)
+		partner.GET("/:slug", h.Persona.Get)
+		partner.POST("", h.Persona.Create)
+		partner.PUT("/:slug", h.Persona.Update)
+		partner.POST("/:slug/publish", h.Persona.Publish)
+	}
 
 	// --- Identity-scoped routes -----------------------------------------------
 	// Everything below resolves an identity — a real account or a minted guest

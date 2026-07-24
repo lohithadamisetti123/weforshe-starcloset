@@ -5,9 +5,9 @@ export interface NavLink {
 
 export const navLinks: NavLink[] = [
   { label: 'Home', to: '/' },
-  { label: 'Assistant', to: '/assistant' },
-  { label: 'Recommendations', to: '/recommendations' },
-  { label: 'Profile', to: '/profile' },
-  { label: 'Saved', to: '/saved' },
+  { label: 'Stylist Studio', to: '/assistant' },
   { label: 'Cart', to: '/cart' },
+  { label: 'Profile', to: '/profile' },
+  { label: 'Recommendations', to: '/recommendations' },
+  { label: 'Saved', to: '/saved' },
 ]

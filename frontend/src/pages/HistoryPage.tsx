@@ -6,7 +6,7 @@ export function HistoryPage() {
       <div className="flex flex-col gap-2">
         <p className="text-xs font-semibold uppercase tracking-widest text-brand-500">Your activity</p>
         <h1 className="text-3xl font-bold tracking-tight text-ink-900 sm:text-4xl">Chat History</h1>
-        <p className="max-w-xl text-ink-500">Every prompt you've sent Bharat AI, and what it recommended.</p>
+        <p className="max-w-xl text-ink-500">Every prompt you've sent your StarCloset stylists, and what they recommended.</p>
       </div>
 
       <div className="mt-8">
