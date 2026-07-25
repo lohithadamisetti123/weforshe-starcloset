@@ -141,7 +141,7 @@ export function Navbar() {
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 lg:px-8">
         <Link to="/" className="flex items-center gap-2 group">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-[0_6px_16px_-4px_rgba(255,63,108,0.55)] transition-transform group-hover:scale-105">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 via-brand-600 to-[#C9A24B] shadow-[0_6px_16px_-4px_rgba(255,63,108,0.55)] transition-transform group-hover:scale-105">
             <Sparkles className="h-4.5 w-4.5 text-white" strokeWidth={2.5} />
           </span>
           <span className="font-display text-[17px] font-bold tracking-tight text-ink-900">

@@ -49,7 +49,17 @@ function DeptCard({ dept, index, onChoose }: { dept: StarDepartment; index: numb
 
       {/* Content */}
       <div className="relative z-10 p-6 text-white">
-        <span className="mb-2 block text-4xl drop-shadow-md">{dept.emoji}</span>
+        {/* Monogram crest — an elegant stand-in for the old emoji */}
+        <span
+          className="mb-3 grid h-12 w-12 place-items-center rounded-full font-display text-xl font-semibold text-white"
+          style={{
+            background: 'rgba(255,255,255,0.14)',
+            backdropFilter: 'blur(8px)',
+            boxShadow: 'inset 0 0 0 1px rgba(231,206,143,0.75), 0 8px 20px -10px rgba(0,0,0,0.55)',
+          }}
+        >
+          {(dept.key?.[0] ?? dept.label?.[0] ?? 'S').toUpperCase()}
+        </span>
         <p className="font-display text-2xl font-bold drop-shadow-sm">{dept.label}</p>
         <p className="mt-1 text-sm text-white/90 drop-shadow-sm">{style.blurb}</p>
         <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/25 px-3 py-1.5 text-xs font-semibold backdrop-blur-sm">

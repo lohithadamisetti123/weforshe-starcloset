@@ -5,7 +5,8 @@ import { motion } from 'framer-motion'
 // fixed set of coloured particles that fan out and fall once, then the parent
 // unmounts it (typically on a timer). Purely decorative and pointer-transparent
 // so it never blocks the UI underneath.
-const COLORS = ['#FF3F6C', '#FF9A8B', '#FFD200', '#56ab2f', '#2193b0', '#c471f5', '#f6d365']
+// Pink-gold celebration palette — Myntra pink with champagne and rose golds.
+const COLORS = ['#FF3F6C', '#FF9EC5', '#E7B84B', '#C9A24B', '#F4E4B8', '#FFC7DD', '#FFF3D6']
 
 export function Confetti({ count = 44 }: { count?: number }) {
   const pieces = useMemo(

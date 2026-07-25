@@ -2,6 +2,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* Myntra pink stays the brand; gold is the luxury accent (see --color-gold-*). */
   --color-brand-50: #fff0f4;
   --color-brand-100: #ffe0e9;
   --color-brand-300: #ff8fac;
@@ -9,15 +10,20 @@
   --color-brand-600: #eb2f5c;
   --color-brand-700: #c91f49;
 
+  --color-gold-100: #fbf3dd;
+  --color-gold-300: #e7ce8f;
+  --color-gold-500: #c9a24b;
+  --color-gold-600: #a9822f;
+
   --color-ink-950: #0b0d14;
   --color-ink-900: #111827;
   --color-ink-700: #374151;
   --color-ink-500: #6b7280;
   --color-ink-300: #d1d5db;
 
-  --color-surface: #fafafa;
+  --color-surface: #fbf8f1;
   --color-card: #ffffff;
-  --color-line: #ececec;
+  --color-line: #eae3d2;
 
   --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;

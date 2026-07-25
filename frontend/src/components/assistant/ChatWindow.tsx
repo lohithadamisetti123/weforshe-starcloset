@@ -7,6 +7,7 @@ import { ChatBubble } from '@/components/assistant/ChatBubble'
 import { AILoader } from '@/components/assistant/AILoader'
 import { PromptChip } from '@/components/assistant/PromptChip'
 import { PromptInput } from '@/components/assistant/PromptInput'
+import { ChatAmbience } from '@/components/assistant/ChatAmbience'
 import { StylistAvatar } from '@/components/starcloset/StylistAvatar'
 import { DepartmentPicker } from '@/components/starcloset/DepartmentPicker'
 import { ProgressionMap } from '@/components/starcloset/ProgressionMap'
@@ -123,7 +124,8 @@ export function ChatWindow({ reopenEntry, onReopenHandled }: ChatWindowProps = {
   const prompts = selectedPersona.samplePrompts ?? []
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-6rem)] max-w-4xl flex-col px-5 lg:px-8">
+    <div className="relative isolate mx-auto flex h-[calc(100vh-6rem)] max-w-4xl flex-col overflow-hidden px-5 lg:px-8">
+      <ChatAmbience />
       {confetti && <Confetti />}
 
       {/* Header: department + active stylist */}
@@ -133,7 +135,7 @@ export function ChatWindow({ reopenEntry, onReopenHandled }: ChatWindowProps = {
           <div>
             <p className="font-display text-sm font-bold text-ink-900">{selectedPersona.displayName}</p>
             <p className="text-[11px] font-medium text-brand-500">
-              {currentDept?.emoji} {currentDept?.label} · {unlockScore} item{unlockScore === 1 ? '' : 's'}
+              {currentDept?.label} · {unlockScore} item{unlockScore === 1 ? '' : 's'}
             </p>
           </div>
         </div>

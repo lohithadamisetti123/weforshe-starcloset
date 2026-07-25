@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/myntra/bharat-ai-backend/internal/config"
 	"github.com/myntra/bharat-ai-backend/internal/models"
 )
 
