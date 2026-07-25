@@ -27,12 +27,19 @@ func TestRuleExtractor_HinglishOccasions(t *testing.T) {
 		prompt string
 		want   models.Occasion
 	}{
+		// "shaadi" has no ceremony-specific occasion of its own, so it resolves
+		// to the wedding bucket. The named ceremonies below each have a
+		// first-class occasion in models.Occasion, and the extractor is
+		// expected to preserve that precision rather than flatten it: the
+		// engine's occasionAffinity matrix is what maps e.g. Sangeet back onto
+		// Wedding-tagged catalogue products (at 0.85), so keeping the specific
+		// reading gives strictly better ranking than the coarse bucket would.
 		{"need something for my cousin's shaadi", models.OccasionWedding},
-		{"outfit for sangeet night", models.OccasionWedding},
-		{"what to wear for mehendi function", models.OccasionWedding},
-		{"haldi ceremony outfit please", models.OccasionWedding},
-		{"going to a diwali party", models.OccasionFestival},
-		{"navratri garba outfit", models.OccasionFestival},
+		{"outfit for sangeet night", models.OccasionSangeet},
+		{"what to wear for mehendi function", models.OccasionMehendi},
+		{"haldi ceremony outfit please", models.OccasionHaldi},
+		{"going to a diwali party", models.OccasionDiwali},
+		{"navratri garba outfit", models.OccasionNavratri},
 		{"eid outfit for the family", models.OccasionFestival},
 		{"holi celebration clothes", models.OccasionFestival},
 	}

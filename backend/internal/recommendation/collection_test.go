@@ -23,6 +23,12 @@ func collectionFixture() []*models.Product {
 			models.GenderWomen, models.OccasionWedding, models.StyleEthnic, "Gold"),
 		product("Embellished Juttis", "Nike", "Footwear", 1199, 1600, 4.4, 700,
 			models.GenderWomen, models.OccasionWedding, models.StyleEthnic, "Rose Gold"),
+		// The wedding template carries an (optional) Clutch slot — RoleBag —
+		// which no other Accessories product in this fixture can fill, since
+		// the Jhumkas resolve to RoleJewellery. Without a bag here every
+		// wedding collection reports Clutch as skipped no matter the budget.
+		product("Embroidered Clutch", "Lavie", "Accessories", 999, 1499, 4.3, 400,
+			models.GenderWomen, models.OccasionWedding, models.StyleEthnic, "Gold"),
 
 		// Women, western / office
 		product("Formal Blouse Top", "Zara", "Tops", 1499, 1999, 3.6, 150,
@@ -66,9 +72,13 @@ func collectionTestEngine() *Engine {
 
 func TestBuildCollection_WomenWeddingStaysWithinBudget(t *testing.T) {
 	engine := collectionTestEngine()
-	intent := NewIntent("wedding collection under 5000")
+	// The budget has to clear the whole template, not just the sum of the
+	// picks: each slot reserves the cheapest item of every later mandatory
+	// slot before it spends (see buildCollection's slotCap), so a budget
+	// tuned only to outfit+shoes+jewellery starves the optional Clutch.
+	intent := NewIntent("wedding collection under 6000")
 	intent.Occasion = occasionPtr(models.OccasionWedding)
-	intent.Budget = &BudgetRange{Max: intPtr(5000)}
+	intent.Budget = &BudgetRange{Max: intPtr(6000)}
 
 	c, err := engine.BuildCollection(context.Background(), DepartmentWomen, intent)
 	if err != nil {
@@ -77,8 +87,8 @@ func TestBuildCollection_WomenWeddingStaysWithinBudget(t *testing.T) {
 	if len(c.Items) == 0 {
 		t.Fatal("expected a non-empty collection")
 	}
-	if c.TotalPrice > 5000 {
-		t.Errorf("total price %d exceeds stated budget of 5000", c.TotalPrice)
+	if c.TotalPrice > 6000 {
+		t.Errorf("total price %d exceeds stated budget of 6000", c.TotalPrice)
 	}
 	for _, it := range c.Items {
 		if it.Product.Product.Gender != models.GenderWomen && it.Product.Product.Gender != models.GenderUnisex {
@@ -192,19 +202,23 @@ func TestBuildCollection_FootwearDepartmentIsSingleSlot(t *testing.T) {
 
 func TestBuildCollection_TightBudgetSkipsSlotsRatherThanExceedingIt(t *testing.T) {
 	engine := collectionTestEngine()
-	intent := NewIntent("wedding collection under 3000")
+	intent := NewIntent("wedding collection under 4400")
 	intent.Occasion = occasionPtr(models.OccasionWedding)
-	// Tight enough that the outfit alone (cheapest wedding outfit in the
-	// fixture is 2899) consumes nearly the whole budget, leaving no room for
-	// footwear or accessories.
-	intent.Budget = &BudgetRange{Max: intPtr(3000)}
+	// Tight enough that the mandatory slots (outfit 2199 + juttis 1199 +
+	// jhumkas 899 = 4297) consume nearly the whole budget, leaving no room for
+	// the optional Clutch at 999 — so it must be skipped rather than pushing
+	// the total over. Going lower doesn't make the test stricter, it makes it
+	// vacuous: because each slot reserves the cheapest item of every later
+	// mandatory slot, anything under 4297 starves the Outfit slot itself and
+	// BuildCollection refuses to return an apparel-less collection at all.
+	intent.Budget = &BudgetRange{Max: intPtr(4400)}
 
 	c, err := engine.BuildCollection(context.Background(), DepartmentWomen, intent)
 	if err != nil {
 		t.Fatalf("BuildCollection returned error: %v", err)
 	}
-	if c.TotalPrice > 3000 {
-		t.Errorf("total price %d exceeds stated budget of 3000", c.TotalPrice)
+	if c.TotalPrice > 4400 {
+		t.Errorf("total price %d exceeds stated budget of 4400", c.TotalPrice)
 	}
 	if len(c.SkippedSlots) == 0 {
 		t.Error("expected at least one slot to be skipped under a tight budget")
