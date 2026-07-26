@@ -129,6 +129,12 @@ including the full scoring-signal breakdown — and
 
 ---
 
+## 🎥 Demo Video
+
+👉 [Watch the Demo Video](https://drive.google.com/file/d/1BXIyCdkRwKKGj3cPJ4vZM5UoxHGIwTdn/view?usp=sharing)
+
+---
+
 ## Tests
 
 ```bash
